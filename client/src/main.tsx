@@ -1,4 +1,4 @@
-import { StrictMode, useEffect } from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   FocusContext,
@@ -9,20 +9,18 @@ import { App } from './App';
 import './theme/tokens.css';
 
 init({
-  debug: false,
+  debug: import.meta.env.DEV,
   visualDebug: false,
+  distanceCalculationMethod: 'center',
 });
 
 function RootFocusWrapper({ children }: { children: React.ReactNode }) {
-  const { ref, focusKey, focusSelf } = useFocusable({
+  const { ref, focusKey } = useFocusable({
     focusable: false,
     trackChildren: true,
     isFocusBoundary: true,
+    focusKey: 'root',
   });
-
-  useEffect(() => {
-    focusSelf();
-  }, [focusSelf]);
 
   return (
     <FocusContext.Provider value={focusKey}>

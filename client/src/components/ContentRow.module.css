@@ -8,6 +8,10 @@
   font-weight: 600;
 }
 
+.rowScroller {
+  overflow: hidden;
+}
+
 .row {
   display: flex;
   gap: 24px;
