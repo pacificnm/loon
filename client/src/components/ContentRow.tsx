@@ -50,6 +50,7 @@ interface ContentRowProps {
   title: string;
   movies: MovieSummary[];
   resolveArtwork: (path: string | undefined) => string | undefined;
+  focusEpoch?: number;
   onSelect: (movie: MovieSummary) => void;
 }
 
@@ -57,6 +58,7 @@ export function ContentRow({
   title,
   movies,
   resolveArtwork,
+  focusEpoch = 0,
   onSelect,
 }: ContentRowProps) {
   const rowRef = useRef<HTMLDivElement>(null);
@@ -73,7 +75,7 @@ export function ContentRow({
     if (movies.length > 0) {
       focusSelf();
     }
-  }, [movies, focusSelf]);
+  }, [movies, focusSelf, focusEpoch]);
 
   return (
     <section className={styles.rowSection}>

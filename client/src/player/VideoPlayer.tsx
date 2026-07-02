@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useWebOsVisibility } from '../platform/useWebOsLifecycle';
 import styles from './VideoPlayer.module.css';
 
 interface VideoPlayerProps {
@@ -34,6 +35,10 @@ export function VideoPlayer({ src, title, onBack }: VideoPlayerProps) {
     window.addEventListener('keydown', onKeyDown, true);
     return () => window.removeEventListener('keydown', onKeyDown, true);
   }, [onBack]);
+
+  useWebOsVisibility(() => {
+    videoRef.current?.pause();
+  });
 
   return (
     <div className={styles.shell}>

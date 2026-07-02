@@ -3,6 +3,7 @@ import { fetchMovies } from './api/client';
 import type { MovieSummary } from './api/types';
 import { ContentRow } from './components/ContentRow';
 import { getServerUrl, resolveArtworkUrl, streamUrl } from './config';
+import { useWebOsLifecycle } from './platform/useWebOsLifecycle';
 import { VideoPlayer } from './player/VideoPlayer';
 import styles from './App.module.css';
 
@@ -16,6 +17,15 @@ export function App() {
   const [movies, setMovies] = useState<MovieSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [focusEpoch, setFocusEpoch] = useState(0);
+
+  const handleRelaunch = useCallback(() => {
+    // Return to browse and restore spatial focus after Home → relaunch.
+    setScreen({ kind: 'browse' });
+    setFocusEpoch((epoch) => epoch + 1);
+  }, []);
+
+  useWebOsLifecycle(handleRelaunch);
 
   const loadMovies = useCallback(async () => {
     setLoading(true);
@@ -72,6 +82,7 @@ export function App() {
           title="Movies"
           movies={movies}
           resolveArtwork={resolveArtwork}
+          focusEpoch={focusEpoch}
           onSelect={(movie) => setScreen({ kind: 'player', movie })}
         />
       ) : null}
