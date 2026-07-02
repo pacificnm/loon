@@ -81,3 +81,42 @@ export interface ApiErrorBody {
     message: string;
   };
 }
+
+export type ScanPhase = 'discovering' | 'enriching' | 'persisting';
+
+export interface ScanProgress {
+  phase?: ScanPhase | null;
+  files_seen: number;
+  candidates: number;
+  errors: number;
+  enriched: number;
+  total_to_enrich: number;
+  current_path?: string | null;
+}
+
+export interface ScanStats {
+  files_seen: number;
+  candidates: number;
+  errors: number;
+}
+
+export type ScanStreamEvent =
+  | { type: 'started'; scan_id: string }
+  | { type: 'progress'; progress: ScanProgress }
+  | {
+      type: 'complete';
+      scan_id: string;
+      movies_count: number;
+      duration_secs: number;
+      stats: ScanStats;
+    }
+  | { type: 'error'; scan_id: string; message: string };
+
+export interface LibraryStatusResponse {
+  state: string;
+  last_scan_at?: string | null;
+  last_scan_duration_secs: number;
+  movies_count: number;
+  scan_in_progress: boolean;
+  progress?: ScanProgress | null;
+}

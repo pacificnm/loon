@@ -3,11 +3,14 @@ import type {
   BrowseResponse,
   FavoriteResponse,
   GenresResponse,
+  LibraryStatusResponse,
   MovieDetail,
   MovieListResponse,
   MovieSummary,
+  ScanStreamEvent,
   SearchResponse,
 } from './types';
+import { readSseStream } from './sse';
 
 export class LoonApiError extends Error {
   readonly code: string;
@@ -162,5 +165,53 @@ export async function fetchAllMovies(
 
   return movies.sort((a, b) =>
     a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }),
+  );
+}
+
+export async function fetchLibraryStatus(baseUrl: string): Promise<LibraryStatusResponse> {
+  return request<LibraryStatusResponse>(baseUrl, '/api/library/status');
+}
+
+export interface StreamLibraryScanOptions {
+  full?: boolean;
+  signal?: AbortSignal;
+}
+
+/** POST /api/library/scan and stream Server-Sent Events until complete. */
+export async function streamLibraryScan(
+  baseUrl: string,
+  options: StreamLibraryScanOptions,
+  onEvent: (event: ScanStreamEvent) => void,
+): Promise<void> {
+  const response = await fetch(`${baseUrl}/api/library/scan`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
+    },
+    body: JSON.stringify({ full: options.full ?? false }),
+    signal: options.signal,
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    try {
+      const body = JSON.parse(text) as ApiErrorBody;
+      throw new LoonApiError(body.error.code, body.error.message);
+    } catch (error) {
+      if (error instanceof LoonApiError) {
+        throw error;
+      }
+      throw new LoonApiError('http_error', `HTTP ${response.status}`);
+    }
+  }
+
+  await readSseStream(
+    response,
+    (message) => {
+      const event = JSON.parse(message.data) as ScanStreamEvent;
+      onEvent(event);
+    },
+    options.signal,
   );
 }
