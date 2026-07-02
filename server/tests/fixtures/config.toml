@@ -1,0 +1,11 @@
+# Test config — used by integration tests via ServerConfig::test().
+# For local dev, copy ../config.example.toml to ../../config.toml.
+
+[loon]
+bind = "127.0.0.1:3000"
+media_root = "tests/fixtures/media"
+
+[media-library]
+id = "main"
+roots = ["Movies"]
+video_extensions = ["mp4", "mkv"]
