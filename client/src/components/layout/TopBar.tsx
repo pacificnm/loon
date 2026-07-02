@@ -5,6 +5,7 @@ import {
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
 import { FocusButton } from '../FocusButton';
+import { exitWebOsApp } from '../../platform/webos';
 import styles from './TopBar.module.css';
 
 export type NavRoute = '/' | '/search' | '/genres' | '/favorites' | '/admin';
@@ -85,6 +86,7 @@ export function TopBar({ onNavigate, focusEpoch = 0 }: TopBarProps) {
             selected={location.pathname === '/admin'}
             onPress={() => onNavigate('/admin')}
           />
+          <FocusButton focusKey="nav-exit" label="Exit" onPress={exitWebOsApp} />
         </div>
       </FocusContext.Provider>
     </header>

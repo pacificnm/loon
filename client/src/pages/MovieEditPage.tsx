@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   FocusContext,
   useFocusable,
@@ -14,7 +14,6 @@ export function MovieEditPage() {
   const { slug = '' } = useParams();
   const server = getServerUrl();
   const navigate = useNavigate();
-  const location = useLocation();
   const [tmdbId, setTmdbId] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -74,10 +73,13 @@ export function MovieEditPage() {
     setSaving(true);
     setError(null);
     try {
-      await setMovieTmdbMatch(server, slug, trimmed);
+      const updated = await setMovieTmdbMatch(server, slug, trimmed);
       navigate(`/movie/${slug}`, {
         replace: true,
-        state: { refreshEpoch: Date.now(), from: location.pathname },
+        state: {
+          refreshedMovie: updated,
+          refreshEpoch: Date.now(),
+        },
       });
     } catch (err) {
       if (err instanceof LoonApiError && err.code === 'tmdb_not_configured') {
@@ -88,7 +90,7 @@ export function MovieEditPage() {
     } finally {
       setSaving(false);
     }
-  }, [location.pathname, navigate, server, slug, tmdbId]);
+  }, [navigate, server, slug, tmdbId]);
 
   if (loading) {
     return <p className={pageStyles.status}>Loading movie…</p>;

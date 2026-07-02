@@ -7,6 +7,10 @@ declare global {
   }
 }
 
+export function exitWebOsApp(): void {
+  window.PalmSystem?.platformBack?.();
+}
+
 export type WebOsRelaunchHandler = () => void;
 
 /** Register webOS TV lifecycle hooks. Required when appinfo.json sets handlesRelaunch: true. */

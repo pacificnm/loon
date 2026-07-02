@@ -12,6 +12,27 @@ import { MovieEditPage } from './pages/MovieEditPage';
 import { MoviesPage } from './pages/MoviesPage';
 import { PlayerPage } from './pages/PlayerPage';
 import { SearchPage } from './pages/SearchPage';
+import type { MovieDetail } from './api/types';
+
+function MovieDetailRoute() {
+  const { slug = '' } = useParams();
+  const location = useLocation();
+  const state = location.state as {
+    refreshedMovie?: MovieDetail;
+    refreshEpoch?: number;
+  } | null;
+  const refreshEpoch = state?.refreshEpoch ?? 0;
+  const refreshedMovie =
+    state?.refreshedMovie?.slug === slug ? state.refreshedMovie : undefined;
+
+  return (
+    <MovieDetailPage
+      key={`${slug}-${refreshEpoch}`}
+      refreshedMovie={refreshedMovie}
+      refreshEpoch={refreshEpoch}
+    />
+  );
+}
 
 function GenreMoviesRoute({ focusEpoch }: { focusEpoch: number }) {
   const { name = '' } = useParams();
@@ -38,7 +59,7 @@ function AppRoutes() {
         <Route path="favorites" element={<FavoritesPage focusEpoch={focusEpoch} />} />
         <Route path="admin" element={<AdminPage />} />
         <Route path="movie/:slug/edit" element={<MovieEditPage />} />
-        <Route path="movie/:slug" element={<MovieDetailPage />} />
+        <Route path="movie/:slug" element={<MovieDetailRoute />} />
       </Route>
       <Route path="play/:slug" element={<PlayerPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />

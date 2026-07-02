@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   FocusContext,
   useFocusable,
@@ -16,11 +16,17 @@ import { getServerUrl, resolveArtworkUrl } from '../config';
 import { FileDetailsSection } from './MovieFileDetails';
 import styles from './MovieDetailPage.module.css';
 
-export function MovieDetailPage() {
+interface MovieDetailPageProps {
+  /** Fresh detail from TMDB rematch — shown immediately while revalidating. */
+  refreshedMovie?: MovieDetail;
+  refreshEpoch?: number;
+}
+
+export function MovieDetailPage({
+  refreshedMovie,
+  refreshEpoch = 0,
+}: MovieDetailPageProps) {
   const { slug = '' } = useParams();
-  const location = useLocation();
-  const refreshEpoch =
-    (location.state as { refreshEpoch?: number } | null)?.refreshEpoch ?? 0;
   const server = getServerUrl();
   const navigate = useNavigate();
   const [detail, setDetail] = useState<MovieDetail | null>(null);
@@ -37,25 +43,42 @@ export function MovieDetailPage() {
   });
 
   const load = useCallback(async () => {
-    setLoading(true);
     setError(null);
-    setDetail(null);
     setSimilar([]);
     ref.current?.scrollTo(0, 0);
 
+    const seed = refreshedMovie?.slug === slug ? refreshedMovie : undefined;
+    if (seed) {
+      setDetail(seed);
+      setLoading(false);
+      try {
+        const related = await fetchSimilarMovies(server, seed);
+        setSimilar(related);
+      } catch {
+        setSimilar([]);
+      }
+    } else {
+      setDetail(null);
+      setLoading(true);
+    }
+
     try {
-      const movie = await fetchMovie(server, slug);
+      const movie = await fetchMovie(server, slug, {
+        cacheBust: refreshEpoch > 0 ? refreshEpoch : Date.now(),
+      });
       setDetail(movie);
       const related = await fetchSimilarMovies(server, movie);
       setSimilar(related);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load movie');
-      setDetail(null);
-      setSimilar([]);
+      if (!seed) {
+        setError(err instanceof Error ? err.message : 'Failed to load movie');
+        setDetail(null);
+        setSimilar([]);
+      }
     } finally {
       setLoading(false);
     }
-  }, [server, slug, refreshEpoch]);
+  }, [ref, refreshEpoch, refreshedMovie, server, slug]);
 
   useEffect(() => {
     void load();
@@ -82,12 +105,14 @@ export function MovieDetailPage() {
     }
   };
 
+  const artworkVersion = detail?.tmdb_id ?? refreshEpoch;
+
   const resolveArtwork = useCallback(
-    (path: string | undefined) => resolveArtworkUrl(path, server),
-    [server],
+    (path: string | undefined) => resolveArtworkUrl(path, server, artworkVersion),
+    [artworkVersion, server],
   );
 
-  if (loading) {
+  if (loading && !detail) {
     return <p className={styles.status}>Loading movie…</p>;
   }
 
@@ -113,7 +138,12 @@ export function MovieDetailPage() {
           <section className={styles.hero}>
             <div className={styles.posterFrame}>
               {posterUrl ? (
-                <img className={styles.poster} src={posterUrl} alt="" />
+                <img
+                  key={posterUrl}
+                  className={styles.poster}
+                  src={posterUrl}
+                  alt=""
+                />
               ) : (
                 <div className={styles.posterPlaceholder}>{detail.title.slice(0, 1)}</div>
               )}

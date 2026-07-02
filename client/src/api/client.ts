@@ -79,10 +79,16 @@ export async function fetchMovies(
   return request<MovieListResponse>(baseUrl, `/api/movies${query ? `?${query}` : ''}`);
 }
 
-export async function fetchMovie(baseUrl: string, slug: string): Promise<MovieDetail> {
+export async function fetchMovie(
+  baseUrl: string,
+  slug: string,
+  options: { cacheBust?: number } = {},
+): Promise<MovieDetail> {
+  const suffix = options.cacheBust ? `?_=${options.cacheBust}` : '';
   const detail = await request<MovieDetail>(
     baseUrl,
-    `/api/movies/${encodeURIComponent(slug)}`,
+    `/api/movies/${encodeURIComponent(slug)}${suffix}`,
+    options.cacheBust ? { cache: 'no-store' } : undefined,
   );
   return normalizeMovieDetail(detail);
 }

@@ -11,14 +11,22 @@ export function getServerUrl(): string {
 export function resolveArtworkUrl(
   path: string | undefined,
   server: string,
+  cacheVersion?: string | number,
 ): string | undefined {
   if (!path) {
     return undefined;
   }
+  let url: string;
   if (path.startsWith('http://') || path.startsWith('https://')) {
-    return path;
+    url = path;
+  } else {
+    url = `${server}${path.startsWith('/') ? path : `/${path}`}`;
   }
-  return `${server}${path.startsWith('/') ? path : `/${path}`}`;
+  if (cacheVersion === undefined) {
+    return url;
+  }
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}v=${encodeURIComponent(String(cacheVersion))}`;
 }
 
 export function streamUrl(server: string, slug: string): string {
