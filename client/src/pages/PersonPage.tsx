@@ -10,6 +10,16 @@ import { FocusButton } from '../components/FocusButton';
 import { getServerUrl, resolveArtworkUrl } from '../config';
 import styles from './PersonPage.module.css';
 
+function parsePersonRouteId(raw: string): number | null {
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed === 'lookup') {
+    return null;
+  }
+  const numeric = trimmed.startsWith('tmdb:') ? trimmed.slice('tmdb:'.length) : trimmed;
+  const personId = Number.parseInt(numeric, 10);
+  return Number.isFinite(personId) && personId > 0 ? personId : null;
+}
+
 function formatGender(code?: number): string | null {
   switch (code) {
     case 1:
@@ -28,7 +38,7 @@ export function PersonPage() {
   const location = useLocation();
   const castLookup = location.state as { movieSlug?: string; castName?: string } | null;
   const isLookup = tmdbId === 'lookup';
-  const personId = Number.parseInt(tmdbId, 10);
+  const personId = parsePersonRouteId(tmdbId);
   const server = getServerUrl();
   const navigate = useNavigate();
   const [detail, setDetail] = useState<PersonDetail | null>(null);
@@ -62,7 +72,7 @@ export function PersonPage() {
           return fetchPersonForCast(server, movieSlug, castName);
         })()
       : (() => {
-          if (!Number.isFinite(personId) || personId <= 0) {
+          if (personId == null) {
             return Promise.reject(new Error('Invalid person id'));
           }
           return fetchPerson(server, personId);
