@@ -7,6 +7,9 @@ use nest_error::NestResult;
 use nest_gui::GuiView;
 use nest_theme::ThemeService;
 
+use crate::config::LoonAdminConfig;
+use crate::library::LibraryPanel;
+
 /// Primary navigation sections for the admin shell.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 enum AdminSection {
@@ -19,22 +22,39 @@ enum AdminSection {
     Settings,
 }
 
-/// Placeholder admin shell for planning and layout iteration.
-#[derive(Default)]
+/// Admin shell with library table and detail navigation.
 pub struct AdminView {
     section: AdminSection,
     theme_applied: bool,
+    server_url: Option<String>,
+    library: LibraryPanel,
+}
+
+impl Default for AdminView {
+    fn default() -> Self {
+        Self {
+            section: AdminSection::Library,
+            theme_applied: false,
+            server_url: None,
+            library: LibraryPanel::default(),
+        }
+    }
 }
 
 impl GuiView for AdminView {
     fn ui(&mut self, ui: &mut egui::Ui, ctx: &AppContext) -> NestResult<()> {
         self.apply_theme(ui, ctx)?;
+        self.ensure_server_url(ctx)?;
 
         TopBottomPanel::top("admin-top").show_inside(ui, |ui| {
             ui.horizontal(|ui| {
                 ui.heading("Loon Admin");
                 ui.separator();
                 ui.label("Desktop library manager");
+                if let Some(url) = self.server_url.as_deref() {
+                    ui.separator();
+                    ui.label(url);
+                }
             });
         });
 
@@ -50,7 +70,15 @@ impl GuiView for AdminView {
 
         CentralPanel::default().show_inside(ui, |ui| {
             match self.section {
-                AdminSection::Library => self.library_panel(ui),
+                AdminSection::Library => {
+                    if let Some(server_url) = self.server_url.clone() {
+                        if let Err(error) = self.library.ui(ui, ctx, &server_url) {
+                            ui.colored_label(ui.visuals().error_fg_color, error.to_string());
+                        }
+                    } else {
+                        ui.label("Server URL not configured.");
+                    }
+                }
                 AdminSection::Scan => self.scan_panel(ui),
                 AdminSection::Settings => self.settings_panel(ui),
             }
@@ -78,18 +106,18 @@ impl AdminView {
         Ok(())
     }
 
+    fn ensure_server_url(&mut self, ctx: &AppContext) -> NestResult<()> {
+        if self.server_url.is_none() {
+            self.server_url = Some(LoonAdminConfig::from_context(ctx)?.server_url);
+        }
+        Ok(())
+    }
+
     fn nav_button(&mut self, ui: &mut egui::Ui, section: AdminSection, label: &str) {
         let selected = self.section == section;
         if ui.selectable_label(selected, label).clicked() {
             self.section = section;
         }
-    }
-
-    fn library_panel(&self, ui: &mut egui::Ui) {
-        ui.heading("Library");
-        ui.label("Movie browse and metadata editing will live here.");
-        ui.add_space(12.0);
-        ui.label("Planned: connect to loon-server, list movies, open detail panel.");
     }
 
     fn scan_panel(&self, ui: &mut egui::Ui) {
@@ -101,8 +129,10 @@ impl AdminView {
 
     fn settings_panel(&self, ui: &mut egui::Ui) {
         ui.heading("Settings");
-        ui.label("Server URL and connection settings.");
+        ui.label("Server URL is read from [loon-admin] in config.toml.");
         ui.add_space(12.0);
-        ui.label("Planned: [loon-admin] server_url config and health check.");
+        if let Some(url) = self.server_url.as_deref() {
+            ui.monospace(url);
+        }
     }
 }

@@ -21,6 +21,10 @@ nest-gui = { git = "https://github.com/pacificnm/nest", branch = "main" }
 nest-logging = { git = "https://github.com/pacificnm/nest", branch = "main" }
 nest-theme = { git = "https://github.com/pacificnm/nest", branch = "main" }
 egui = "0.31"
+egui_extras = { version = "0.31", features = ["image", "http"] }
 eframe = { version = "0.31", default-features = true }
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
 serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+urlencoding = "2"
 tracing = "0.1"

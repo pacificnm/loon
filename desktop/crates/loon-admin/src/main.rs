@@ -1,5 +1,8 @@
 //! Loon admin desktop entry point.
 
+mod api;
+mod config;
+mod library;
 mod module;
 mod view;
 
