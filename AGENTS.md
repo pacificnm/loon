@@ -19,3 +19,17 @@ See [docs/webos-knowledge-v1.md](docs/webos-knowledge-v1.md) and
 
 Use `save_context_memory` with `session_key` = current git branch after each turn
 when working from a nest workspace with hooks enabled.
+
+## Client changes → commit and push (mandatory)
+
+**Dev machine ≠ TV/simulator machine.** Any change under `client/` is untestable on
+hardware until it is on `origin/main`.
+
+After every client implementation or fix:
+
+1. `npm test` and `npm run build` in `client/`
+2. **Commit and push** to `pacificnm/loon` — do not leave fixes local-only
+3. Tell the user the commit hash and TV reinstall steps (`package:webos` → `ares-package -n` → `ares-install`)
+
+The user pulls on the TV/simulator box before testing. Skipping push blocks all
+further verification.
