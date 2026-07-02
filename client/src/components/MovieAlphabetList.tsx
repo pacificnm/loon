@@ -17,8 +17,21 @@ function itemFocusKey(slug: string): string {
   return `movie-${slug}`;
 }
 
-function sectionFocusKey(letter: string): string {
-  return `section-${letter}`;
+function scrollItemIntoView(list: HTMLElement, layout: { y: number; height: number }) {
+  const listRect = list.getBoundingClientRect();
+  const itemTop = layout.y;
+  const itemBottom = layout.y + layout.height;
+  if (itemTop < listRect.top) {
+    list.scrollTop -= listRect.top - itemTop + 16;
+  } else if (itemBottom > listRect.bottom) {
+    list.scrollTop += itemBottom - listRect.bottom + 16;
+  }
+}
+
+function scrollSectionIntoView(list: HTMLElement, section: HTMLElement) {
+  const listRect = list.getBoundingClientRect();
+  const sectionRect = section.getBoundingClientRect();
+  list.scrollTop += sectionRect.top - listRect.top;
 }
 
 interface MovieRowProps {
@@ -36,17 +49,8 @@ function MovieRow({ movie, server, listRef, onSelect }: MovieRowProps) {
     onEnterPress: () => onSelect(movie),
     onFocus: (layout) => {
       const list = listRef.current;
-      if (!list) {
-        return;
-      }
-      const itemTop = layout.y;
-      const itemBottom = layout.y + layout.height;
-      const viewTop = list.scrollTop;
-      const viewBottom = viewTop + list.clientHeight;
-      if (itemTop < viewTop) {
-        list.scrollTop = itemTop - 16;
-      } else if (itemBottom > viewBottom) {
-        list.scrollTop = itemBottom - list.clientHeight + 16;
+      if (list) {
+        scrollItemIntoView(list, layout);
       }
     },
   });
@@ -73,71 +77,32 @@ function MovieRow({ movie, server, listRef, onSelect }: MovieRowProps) {
   );
 }
 
-interface LetterSectionProps {
+function LetterBlock({
+  group,
+  server,
+  listRef,
+  onSelect,
+}: {
   group: LetterGroup;
   server: string;
   listRef: RefObject<HTMLDivElement>;
   onSelect: (movie: MovieSummary) => void;
-}
-
-function LetterSection({ group, server, listRef, onSelect }: LetterSectionProps) {
-  const { ref, focusKey } = useFocusable({
-    focusable: false,
-    trackChildren: true,
-    focusKey: sectionFocusKey(group.letter),
-    preferredChildFocusKey: itemFocusKey(group.movies[0]?.slug ?? ''),
-  });
-
+}) {
   return (
-    <section ref={ref} className={styles.section} data-letter={group.letter}>
+    <div className={styles.section} data-letter={group.letter}>
       <h2 className={styles.letterHeading}>{group.letter}</h2>
-      <FocusContext.Provider value={focusKey}>
-        <div className={styles.sectionMovies}>
-          {group.movies.map((movie) => (
-            <MovieRow
-              key={movie.slug}
-              movie={movie}
-              server={server}
-              listRef={listRef}
-              onSelect={onSelect}
-            />
-          ))}
-        </div>
-      </FocusContext.Provider>
-    </section>
-  );
-}
-
-interface AlphabetIndexProps {
-  activeLetters: Set<string>;
-  onJump: (letter: string) => void;
-}
-
-function AlphabetIndex({ activeLetters, onJump }: AlphabetIndexProps) {
-  const { ref, focusKey } = useFocusable({
-    focusable: false,
-    trackChildren: true,
-    focusKey: 'alphabet-index',
-  });
-
-  return (
-    <aside className={styles.indexRail}>
-      <FocusContext.Provider value={focusKey}>
-        <div ref={ref} className={styles.indexLetters}>
-          {ALPHABET_LETTERS.map((letter) => {
-            const enabled = activeLetters.has(letter);
-            return (
-              <IndexLetter
-                key={letter}
-                letter={letter}
-                enabled={enabled}
-                onJump={onJump}
-              />
-            );
-          })}
-        </div>
-      </FocusContext.Provider>
-    </aside>
+      <div className={styles.sectionMovies}>
+        {group.movies.map((movie) => (
+          <MovieRow
+            key={movie.slug}
+            movie={movie}
+            server={server}
+            listRef={listRef}
+            onSelect={onSelect}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -156,21 +121,16 @@ function IndexLetter({
     onEnterPress: () => onJump(letter),
   });
 
-  const className = [
-    styles.indexLetter,
-    enabled ? styles.indexEnabled : styles.indexDisabled,
-    focused ? styles.indexFocused : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
+  if (!enabled) {
+    return <span className={`${styles.indexLetter} ${styles.indexDisabled}`}>{letter}</span>;
+  }
 
   return (
     <button
       ref={ref}
       type="button"
-      className={className}
-      disabled={!enabled}
-      onClick={() => enabled && onJump(letter)}
+      className={`${styles.indexLetter} ${styles.indexEnabled} ${focused ? styles.indexFocused : ''}`}
+      onClick={() => onJump(letter)}
     >
       {letter}
     </button>
@@ -217,10 +177,13 @@ export function MovieAlphabetList({
     if (!section) {
       return;
     }
-    list.scrollTop = section.offsetTop;
+    scrollSectionIntoView(list, section);
+
     const first = groups.find((group) => group.letter === letter)?.movies[0];
     if (first) {
-      setFocus(itemFocusKey(first.slug));
+      window.requestAnimationFrame(() => {
+        setFocus(itemFocusKey(first.slug));
+      });
     }
   };
 
@@ -229,23 +192,32 @@ export function MovieAlphabetList({
   }
 
   return (
-    <div className={styles.shell}>
-      <FocusContext.Provider value={focusKey}>
-        <div ref={ref} className={styles.listPane}>
-          <div ref={listRef} className={styles.list}>
-            {groups.map((group) => (
-              <LetterSection
-                key={group.letter}
-                group={group}
-                server={server}
-                listRef={listRef}
-                onSelect={onSelect}
+    <FocusContext.Provider value={focusKey}>
+      <div ref={ref} className={styles.shell}>
+        <div ref={listRef} className={styles.list}>
+          {groups.map((group) => (
+            <LetterBlock
+              key={group.letter}
+              group={group}
+              server={server}
+              listRef={listRef}
+              onSelect={onSelect}
+            />
+          ))}
+        </div>
+        <aside className={styles.indexRail}>
+          <div className={styles.indexLetters}>
+            {ALPHABET_LETTERS.map((letter) => (
+              <IndexLetter
+                key={letter}
+                letter={letter}
+                enabled={activeLetters.has(letter)}
+                onJump={scrollToLetter}
               />
             ))}
           </div>
-        </div>
-      </FocusContext.Provider>
-      <AlphabetIndex activeLetters={activeLetters} onJump={scrollToLetter} />
-    </div>
+        </aside>
+      </div>
+    </FocusContext.Provider>
   );
 }

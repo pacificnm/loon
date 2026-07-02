@@ -29,14 +29,13 @@ function MovieRow({ movie, server, listRef, onSelect }: MovieRowProps) {
       if (!list) {
         return;
       }
+      const listRect = list.getBoundingClientRect();
       const itemTop = layout.y;
       const itemBottom = layout.y + layout.height;
-      const viewTop = list.scrollTop;
-      const viewBottom = viewTop + list.clientHeight;
-      if (itemTop < viewTop) {
-        list.scrollTop = itemTop - 16;
-      } else if (itemBottom > viewBottom) {
-        list.scrollTop = itemBottom - list.clientHeight + 16;
+      if (itemTop < listRect.top) {
+        list.scrollTop -= listRect.top - itemTop + 16;
+      } else if (itemBottom > listRect.bottom) {
+        list.scrollTop += itemBottom - listRect.bottom + 16;
       }
     },
   });

@@ -4,15 +4,12 @@
   height: 100%;
   padding: 0 24px 32px 40px;
   min-height: 0;
-}
-
-.listPane {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
+  overflow: hidden;
 }
 
 .list {
+  flex: 1;
+  min-width: 0;
   height: 100%;
   overflow-y: auto;
   padding-right: 8px;

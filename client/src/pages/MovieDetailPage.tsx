@@ -55,7 +55,7 @@ export function MovieDetailPage() {
 
   useEffect(() => {
     if (detail) {
-      focusSelf();
+      window.requestAnimationFrame(() => focusSelf());
     }
   }, [detail, focusSelf]);
 
