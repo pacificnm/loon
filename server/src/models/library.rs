@@ -71,6 +71,13 @@ pub struct FavoriteResponse {
     pub favorite: bool,
 }
 
+/// `PUT /api/movies/:slug/match` request.
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
+pub struct MatchRequest {
+    /// TMDB movie id (`348` or `tmdb:348`).
+    pub tmdb_id: String,
+}
+
 /// `PUT /api/movies/:slug/progress` request.
 #[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
 pub struct ProgressRequest {

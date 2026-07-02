@@ -8,6 +8,7 @@ import { AdminPage } from './pages/AdminPage';
 import { FavoritesPage } from './pages/FavoritesPage';
 import { GenresPage } from './pages/GenresPage';
 import { MovieDetailPage } from './pages/MovieDetailPage';
+import { MovieEditPage } from './pages/MovieEditPage';
 import { MoviesPage } from './pages/MoviesPage';
 import { PlayerPage } from './pages/PlayerPage';
 import { SearchPage } from './pages/SearchPage';
@@ -36,6 +37,7 @@ function AppRoutes() {
         <Route path="genre/:name" element={<GenreMoviesRoute focusEpoch={focusEpoch} />} />
         <Route path="favorites" element={<FavoritesPage focusEpoch={focusEpoch} />} />
         <Route path="admin" element={<AdminPage />} />
+        <Route path="movie/:slug/edit" element={<MovieEditPage />} />
         <Route path="movie/:slug" element={<MovieDetailPage />} />
       </Route>
       <Route path="play/:slug" element={<PlayerPage />} />

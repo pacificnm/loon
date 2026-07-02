@@ -1,0 +1,49 @@
+.panel {
+  padding: 8px 40px 32px;
+  max-width: 760px;
+}
+
+.label {
+  display: block;
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0 0 16px;
+  font-size: 20px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.input {
+  width: min(420px, 100%);
+  font-size: 28px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.inputFocused {
+  border-color: var(--focus);
+  outline: none;
+}
+
+.input:disabled {
+  opacity: 0.6;
+}
+
+.error {
+  margin: 16px 0 0;
+  font-size: 20px;
+  color: #f87171;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}

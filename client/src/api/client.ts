@@ -87,6 +87,23 @@ export async function fetchMovie(baseUrl: string, slug: string): Promise<MovieDe
   return normalizeMovieDetail(detail);
 }
 
+export async function setMovieTmdbMatch(
+  baseUrl: string,
+  slug: string,
+  tmdbId: string,
+): Promise<MovieDetail> {
+  const detail = await request<MovieDetail>(
+    baseUrl,
+    `/api/movies/${encodeURIComponent(slug)}/match`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tmdb_id: tmdbId }),
+    },
+  );
+  return normalizeMovieDetail(detail);
+}
+
 export async function searchMovies(
   baseUrl: string,
   query: string,

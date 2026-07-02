@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   FocusContext,
   useFocusable,
@@ -18,6 +18,9 @@ import styles from './MovieDetailPage.module.css';
 
 export function MovieDetailPage() {
   const { slug = '' } = useParams();
+  const location = useLocation();
+  const refreshEpoch =
+    (location.state as { refreshEpoch?: number } | null)?.refreshEpoch ?? 0;
   const server = getServerUrl();
   const navigate = useNavigate();
   const [detail, setDetail] = useState<MovieDetail | null>(null);
@@ -52,7 +55,7 @@ export function MovieDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [server, slug]);
+  }, [server, slug, refreshEpoch]);
 
   useEffect(() => {
     void load();
@@ -134,6 +137,11 @@ export function MovieDetailPage() {
                   focusKey="detail-favorite"
                   label={detail.is_favorite ? 'Remove Favorite' : 'Favorite'}
                   onPress={() => void toggleFavorite()}
+                />
+                <FocusButton
+                  focusKey="detail-edit"
+                  label="Edit"
+                  onPress={() => navigate(`/movie/${detail.slug}/edit`)}
                 />
               </div>
             </div>

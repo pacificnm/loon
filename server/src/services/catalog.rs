@@ -9,7 +9,7 @@ use tracing::warn;
 
 use crate::models::{CastMemberDto, CrewMemberDto, MovieDetail, MovieSummary};
 use crate::services::artwork::{ArtworkKind, ArtworkRuntime};
-use crate::services::enrichment::ScanArtworkMap;
+use crate::services::enrichment::{ScanArtwork, ScanArtworkMap};
 use crate::services::media_file::file_info_from_record;
 use crate::services::slug::unique_movie_slug;
 
@@ -115,6 +115,31 @@ impl LoonCatalog {
     /// Inserts a movie record, replacing any existing entry with the same slug.
     pub fn insert(&mut self, record: LoonMovieRecord) {
         self.by_slug.insert(record.slug.clone(), record);
+    }
+}
+
+/// Updates a movie record with TMDB metadata while preserving slug and file path.
+pub fn apply_tmdb_fetch(
+    record: &mut LoonMovieRecord,
+    tmdb_id: u32,
+    metadata: &MovieMetadata,
+    artwork: Option<&ScanArtwork>,
+) {
+    record.title = metadata.title.clone();
+    record.original_title = metadata.original_title.clone();
+    record.year = metadata.year;
+    record.runtime_minutes = metadata
+        .runtime_seconds
+        .map(|seconds| (seconds / 60) as u16);
+    record.summary = metadata.summary.clone();
+    record.genres = metadata.genres.clone();
+    record.cast = map_cast(&metadata.cast);
+    record.crew = map_crew(&metadata.crew);
+    record.tmdb_id = Some(tmdb_id.to_string());
+    record.imdb_id = metadata.external_ids.imdb_id.clone();
+    if let Some(art) = artwork {
+        record.poster_url = art.poster_url.clone();
+        record.backdrop_url = art.backdrop_url.clone();
     }
 }
 

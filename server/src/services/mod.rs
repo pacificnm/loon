@@ -14,3 +14,4 @@ pub mod scan_state;
 pub mod slug;
 pub mod streaming;
 pub mod tmdb;
+pub mod tmdb_match;

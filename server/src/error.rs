@@ -34,6 +34,15 @@ pub fn library_scanning() -> ServeError {
     )
 }
 
+/// Returns a 503 JSON error when TMDB enrichment is disabled.
+pub fn tmdb_not_configured() -> ServeError {
+    api_error(
+        HttpStatus::SERVICE_UNAVAILABLE,
+        "tmdb_not_configured",
+        "TMDB is not configured on this server".into(),
+    )
+}
+
 /// Returns a 404 JSON error when artwork is unavailable for a movie.
 pub fn artwork_not_found(slug: &str, kind: crate::services::artwork::ArtworkKind) -> ServeError {
     api_error(

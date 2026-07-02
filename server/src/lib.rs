@@ -39,6 +39,7 @@ pub fn api_routes() -> RouteGroup {
         .get("/movies", api::movies::list_movies)
         .get("/movies/:slug", api::movies::get_movie)
         .put("/movies/:slug/favorite", api::favorites::set_favorite)
+        .put("/movies/:slug/match", api::match_handler::set_tmdb_match)
         .put("/movies/:slug/progress", api::progress::save_progress)
         .get("/search", api::search::search)
         .get("/genres", api::genres::list_genres)

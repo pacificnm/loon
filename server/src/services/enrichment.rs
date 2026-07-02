@@ -151,6 +151,15 @@ async fn artwork_urls(
     })
 }
 
+/// Fetches poster and backdrop URLs for TMDB path tokens.
+pub async fn artwork_for_paths(
+    tmdb: &TmdbRuntime,
+    poster_path: &Option<String>,
+    backdrop_path: &Option<String>,
+) -> Option<ScanArtwork> {
+    artwork_urls(tmdb, poster_path, backdrop_path).await
+}
+
 /// Returns ordered unique title variants to try against TMDB.
 pub fn search_title_variants(candidate: &MovieScanCandidate) -> Vec<String> {
     let mut variants: Vec<String> = Vec::new();
