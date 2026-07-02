@@ -13,7 +13,7 @@ use nest_error::NestResult;
 use crate::api::{LoonApiClient, MovieDetail, MovieSummary};
 
 pub use movie_detail::MovieDetailPanel;
-pub use movies_table::MoviesTable;
+pub use movies_table::{MovieRowAction, MovieRowEvent, MoviesTable};
 
 /// Library sub-routes.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -71,14 +71,13 @@ impl Default for LibraryPanel {
 impl LibraryPanel {
     /// Renders the library route (list or detail).
     pub fn ui(&mut self, ui: &mut Ui, ctx: &AppContext, server_url: &str) -> NestResult<()> {
-        self.ensure_image_loaders(ui);
-
         match self.route.clone() {
             LibraryRoute::List => {
                 self.poll_movies();
                 self.list_ui(ui, ctx, server_url)?;
             }
             LibraryRoute::Detail { slug } => {
+                self.ensure_image_loaders(ui);
                 self.poll_detail();
                 self.detail_ui(ui, ctx, server_url, &slug)?;
             }
@@ -124,15 +123,28 @@ impl LibraryPanel {
                 ui.label(format!("{} movies", filtered.len()));
                 ui.add_space(4.0);
 
-                let selected = self.table.show(ui, &filtered);
-                if let Some(slug) = selected {
-                    self.open_detail(slug);
+                if let Some(event) = self.table.show(ui, &filtered) {
+                    self.handle_row_action(event);
                 }
             }
         }
 
         let _ = ctx;
         Ok(())
+    }
+
+    fn handle_row_action(&mut self, event: MovieRowEvent) {
+        match event.action {
+            MovieRowAction::Play => {
+                tracing::info!(slug = %event.slug, "play action (not wired yet)");
+            }
+            MovieRowAction::View | MovieRowAction::Edit => {
+                self.open_detail(event.slug);
+            }
+            MovieRowAction::Delete => {
+                tracing::info!(slug = %event.slug, "delete action (not wired yet)");
+            }
+        }
     }
 
     fn detail_ui(
@@ -276,7 +288,7 @@ fn filter_movies(movies: &[MovieSummary], search: &str) -> Vec<MovieSummary> {
         .filter(|movie| {
             movie.title.to_ascii_lowercase().contains(&query)
                 || movie
-                    .summary
+                    .relative_path
                     .to_ascii_lowercase()
                     .contains(&query)
                 || movie

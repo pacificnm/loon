@@ -370,6 +370,8 @@ fn record_to_summary(record: &LoonMovieRecord) -> MovieSummary {
             &record.backdrop_url,
         ),
         summary: record.summary.clone().unwrap_or_default(),
+        relative_path: record.relative_path.clone(),
+        size_bytes: record.size_bytes,
     }
 }
 

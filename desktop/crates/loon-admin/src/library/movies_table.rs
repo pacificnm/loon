@@ -1,25 +1,49 @@
-//! Movies table with poster thumbnails.
+//! Movies admin table.
 
-use egui::{Align, Image, ScrollArea, Ui};
+use egui::{Align, Button, Response, ScrollArea, Ui};
 use egui_extras::{Column, TableBuilder};
 
 use crate::api::MovieSummary;
 
-const POSTER_WIDTH: f32 = 40.0;
-const ROW_HEIGHT: f32 = 56.0;
+const ROW_HEIGHT: f32 = 30.0;
 
-/// Sortable movie table widget.
+/// Row action triggered from the actions column.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MovieRowAction {
+    /// Play the movie.
+    Play,
+    /// Open read-only detail view.
+    View,
+    /// Open metadata editor.
+    Edit,
+    /// Remove from library.
+    Delete,
+}
+
+/// A movie row action with target slug.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MovieRowEvent {
+    /// Movie slug.
+    pub slug: String,
+    /// Action selected.
+    pub action: MovieRowAction,
+}
+
+/// Admin movie list table.
 #[derive(Default)]
 pub struct MoviesTable {
     sort_title_asc: bool,
 }
 
 impl MoviesTable {
-    /// Draws the table. Returns the slug when a row is clicked.
-    pub fn show(&mut self, ui: &mut Ui, movies: &[MovieSummary]) -> Option<String> {
+    /// Draws the table. Returns an event when an action button is clicked.
+    pub fn show(&mut self, ui: &mut Ui, movies: &[MovieSummary]) -> Option<MovieRowEvent> {
         let mut movies: Vec<_> = movies.to_vec();
         movies.sort_by(|left, right| {
-            let order = left.title.cmp(&right.title);
+            let order = left
+                .title
+                .to_ascii_lowercase()
+                .cmp(&right.title.to_ascii_lowercase());
             if self.sort_title_asc {
                 order
             } else {
@@ -27,7 +51,7 @@ impl MoviesTable {
             }
         });
 
-        let mut selected = None;
+        let mut event = None;
 
         ScrollArea::vertical()
             .auto_shrink([false, false])
@@ -36,16 +60,13 @@ impl MoviesTable {
                     .striped(true)
                     .resizable(true)
                     .cell_layout(egui::Layout::left_to_right(Align::Center))
-                    .column(Column::auto().at_least(POSTER_WIDTH + 8.0))
-                    .column(Column::remainder().at_least(160.0))
-                    .column(Column::auto().at_least(56.0))
-                    .column(Column::auto().at_least(72.0))
-                    .column(Column::remainder().at_least(200.0))
+                    .column(Column::remainder().at_least(180.0))
+                    .column(Column::auto().at_least(52.0))
+                    .column(Column::remainder().at_least(240.0))
+                    .column(Column::auto().at_least(80.0))
+                    .column(Column::auto().at_least(132.0))
                     .min_scrolled_height(0.0)
                     .header(24.0, |mut header| {
-                        header.col(|ui| {
-                            ui.strong("Poster");
-                        });
                         header.col(|ui| {
                             if ui
                                 .button(format!(
@@ -61,10 +82,13 @@ impl MoviesTable {
                             ui.strong("Year");
                         });
                         header.col(|ui| {
-                            ui.strong("Runtime");
+                            ui.strong("File");
                         });
                         header.col(|ui| {
-                            ui.strong("Summary");
+                            ui.strong("Size");
+                        });
+                        header.col(|ui| {
+                            ui.strong("Actions");
                         });
                     })
                     .body(|body| {
@@ -73,63 +97,87 @@ impl MoviesTable {
                             let movie = &movies[index];
 
                             row.col(|ui| {
-                                self.poster_cell(ui, movie);
-                            });
-                            row.col(|ui| {
                                 ui.label(&movie.title);
                             });
                             row.col(|ui| {
-                                ui.label(movie.year.map(|y| y.to_string()).unwrap_or_default());
+                                ui.label(movie.year.map(|y| y.to_string()).unwrap_or_else(|| "—".into()));
                             });
                             row.col(|ui| {
-                                ui.label(format!("{} min", movie.runtime_minutes));
+                                ui.style_mut().override_text_style = Some(egui::TextStyle::Monospace);
+                                let response = ui.label(&movie.relative_path);
+                                response.on_hover_text(&movie.relative_path);
+                                ui.style_mut().override_text_style = None;
                             });
                             row.col(|ui| {
-                                let summary = truncate_summary(&movie.summary, 120);
-                                ui.label(summary);
+                                ui.label(format_file_size(movie.size_bytes));
                             });
-
-                            if row.response().clicked() {
-                                selected = Some(movie.slug.clone());
-                            }
+                            row.col(|ui| {
+                                if let Some(clicked) = self.actions_cell(ui, &movie.slug) {
+                                    event = Some(clicked);
+                                }
+                            });
                         });
                     });
             });
 
-        selected
+        event
     }
 
-    fn poster_cell(&self, ui: &mut Ui, movie: &MovieSummary) {
-        let size = egui::vec2(POSTER_WIDTH, ROW_HEIGHT - 8.0);
-        if let Some(url) = movie.poster_url.as_deref().filter(|url| !url.is_empty()) {
-            ui.add(
-                Image::new(url)
-                    .fit_to_exact_size(size)
-                    .corner_radius(4.0)
-                    .show_loading_spinner(true),
-            );
-        } else {
-            let (rect, _) = ui.allocate_exact_size(size, egui::Sense::hover());
-            ui.painter().rect_filled(
-                rect,
-                4.0,
-                ui.visuals().faint_bg_color,
-            );
-            ui.painter().text(
-                rect.center(),
-                egui::Align2::CENTER_CENTER,
-                movie.title.chars().next().unwrap_or('?'),
-                egui::FontId::proportional(18.0),
-                ui.visuals().weak_text_color(),
-            );
-        }
+    fn actions_cell(&self, ui: &mut Ui, slug: &str) -> Option<MovieRowEvent> {
+        let mut event = None;
+        ui.horizontal(|ui| {
+            ui.spacing_mut().item_spacing.x = 4.0;
+            if action_button(ui, "▶", "Play").clicked() {
+                event = Some(MovieRowEvent {
+                    slug: slug.to_string(),
+                    action: MovieRowAction::Play,
+                });
+            }
+            if action_button(ui, "◎", "View").clicked() {
+                event = Some(MovieRowEvent {
+                    slug: slug.to_string(),
+                    action: MovieRowAction::View,
+                });
+            }
+            if action_button(ui, "✎", "Edit").clicked() {
+                event = Some(MovieRowEvent {
+                    slug: slug.to_string(),
+                    action: MovieRowAction::Edit,
+                });
+            }
+            if action_button(ui, "✕", "Delete").clicked() {
+                event = Some(MovieRowEvent {
+                    slug: slug.to_string(),
+                    action: MovieRowAction::Delete,
+                });
+            }
+        });
+        event
     }
 }
 
-fn truncate_summary(summary: &str, max_chars: usize) -> String {
-    if summary.chars().count() <= max_chars {
-        return summary.to_string();
+fn action_button(ui: &mut Ui, icon: &str, tooltip: &str) -> Response {
+    ui.add(Button::new(icon).min_size(egui::vec2(28.0, 24.0)))
+        .on_hover_text(tooltip)
+}
+
+fn format_file_size(size_bytes: Option<u64>) -> String {
+    let Some(bytes) = size_bytes else {
+        return "—".to_string();
+    };
+
+    const KB: f64 = 1024.0;
+    const MB: f64 = KB * 1024.0;
+    const GB: f64 = MB * 1024.0;
+    let value = bytes as f64;
+
+    if value >= GB {
+        format!("{:.2} GB", value / GB)
+    } else if value >= MB {
+        format!("{:.1} MB", value / MB)
+    } else if value >= KB {
+        format!("{:.0} KB", value / KB)
+    } else {
+        format!("{bytes} B")
     }
-    let truncated: String = summary.chars().take(max_chars.saturating_sub(1)).collect();
-    format!("{truncated}…")
 }

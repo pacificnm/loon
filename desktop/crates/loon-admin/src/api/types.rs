@@ -21,6 +21,11 @@ pub struct MovieSummary {
     pub backdrop_url: Option<String>,
     /// Short plot summary.
     pub summary: String,
+    /// Path relative to the media library root.
+    #[serde(default)]
+    pub relative_path: String,
+    /// File size in bytes when known.
+    pub size_bytes: Option<u64>,
 }
 
 /// `GET /api/movies` response body.

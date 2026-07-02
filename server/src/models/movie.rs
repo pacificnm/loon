@@ -52,6 +52,11 @@ pub struct MovieSummary {
     pub backdrop_url: Option<String>,
     /// Short plot summary.
     pub summary: String,
+    /// Path relative to the media library root.
+    pub relative_path: String,
+    /// File size in bytes when known.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub size_bytes: Option<u64>,
 }
 
 /// Full movie detail for the webOS detail screen.
