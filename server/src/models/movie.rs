@@ -122,6 +122,9 @@ pub struct CastMemberDto {
     /// Profile image URL when known.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub profile_url: Option<String>,
+    /// TMDB person id when known.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tmdb_person_id: Option<u32>,
 }
 
 /// Crew member in a movie detail response.

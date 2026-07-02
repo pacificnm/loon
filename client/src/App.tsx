@@ -10,6 +10,7 @@ import { GenresPage } from './pages/GenresPage';
 import { MovieDetailPage } from './pages/MovieDetailPage';
 import { MovieEditPage } from './pages/MovieEditPage';
 import { MoviesPage } from './pages/MoviesPage';
+import { PersonPage } from './pages/PersonPage';
 import { PlayerPage } from './pages/PlayerPage';
 import { SearchPage } from './pages/SearchPage';
 import type { MovieDetail } from './api/types';
@@ -60,6 +61,7 @@ function AppRoutes() {
         <Route path="admin" element={<AdminPage />} />
         <Route path="movie/:slug/edit" element={<MovieEditPage />} />
         <Route path="movie/:slug" element={<MovieDetailRoute />} />
+        <Route path="person/:tmdbId" element={<PersonPage />} />
       </Route>
       <Route path="play/:slug" element={<PlayerPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />

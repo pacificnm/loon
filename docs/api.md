@@ -334,6 +334,12 @@ Triggers a **background** rescan of the media library. Returns `202 Accepted` im
 
 Body (optional): `{ "full": true }` refreshes TMDB metadata for movies that are not manually locked. Movies with a stored `tmdb_id` are re-fetched by id (never re-guessed from the filename). Movies corrected via `PUT /api/movies/:slug/match` are locked and skipped. Default incremental scan only touches new or changed files.
 
+### `GET /api/people/:tmdb_id`
+
+Returns TMDB person details (cached in SQLite after first fetch) plus **Known For** movies from the local library.
+
+Response includes `biography`, `profile_url`, personal info fields, and `known_for[]` with `slug`, `title`, `year`, `poster_url`, and `character` for movies in your library featuring that actor.
+
 ---
 
 ## `GET /api/library/status`

@@ -197,7 +197,11 @@ export function MovieDetailPage({
           <FileDetailsSection detail={detail} />
 
           {detail.cast && detail.cast.length > 0 ? (
-            <CastRow cast={detail.cast} resolveArtwork={resolveArtwork} />
+            <CastRow
+              cast={detail.cast}
+              resolveArtwork={resolveArtwork}
+              onSelectPerson={(personId) => navigate(`/person/${personId}`)}
+            />
           ) : null}
 
           {similar.length > 0 ? (
@@ -222,9 +226,11 @@ export function MovieDetailPage({
 function CastRow({
   cast,
   resolveArtwork,
+  onSelectPerson,
 }: {
   cast: MovieDetail['cast'];
   resolveArtwork: (path: string | undefined) => string | undefined;
+  onSelectPerson: (tmdbPersonId: number) => void;
 }) {
   const { ref, focusKey } = useFocusable({
     focusable: false,
@@ -244,6 +250,7 @@ function CastRow({
               member={member}
               index={index}
               resolveArtwork={resolveArtwork}
+              onSelectPerson={onSelectPerson}
             />
           ))}
         </div>
@@ -256,18 +263,36 @@ function CastCard({
   member,
   index,
   resolveArtwork,
+  onSelectPerson,
 }: {
   member: MovieDetail['cast'][number];
   index: number;
   resolveArtwork: (path: string | undefined) => string | undefined;
+  onSelectPerson: (tmdbPersonId: number) => void;
 }) {
+  const profileUrl = resolveArtwork(member.profile_url);
+  const canOpen = member.tmdb_person_id != null && member.tmdb_person_id > 0;
   const { ref, focused } = useFocusable({
     focusKey: `cast-${index}`,
+    onEnterPress: () => {
+      if (canOpen) {
+        onSelectPerson(member.tmdb_person_id!);
+      }
+    },
   });
-  const profileUrl = resolveArtwork(member.profile_url);
 
   return (
-    <div ref={ref} className={`${styles.castCard} ${focused ? styles.castCardFocused : ''}`}>
+    <div
+      ref={ref}
+      className={`${styles.castCard} ${focused ? styles.castCardFocused : ''} ${canOpen ? styles.castCardClickable : ''}`}
+      role={canOpen ? 'button' : undefined}
+      tabIndex={-1}
+      onClick={() => {
+        if (canOpen) {
+          onSelectPerson(member.tmdb_person_id!);
+        }
+      }}
+    >
       <div className={styles.castPhotoFrame}>
         {profileUrl ? (
           <img className={styles.castPhoto} src={profileUrl} alt="" />

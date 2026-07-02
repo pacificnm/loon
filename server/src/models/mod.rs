@@ -3,6 +3,7 @@
 mod browse;
 mod library;
 mod movie;
+mod person;
 mod root;
 
 pub use browse::{BrowseResponse, BrowseRow};
@@ -14,4 +15,5 @@ pub use movie::{
     CastMemberDto, CrewMemberDto, HealthResponse, MovieDetail, MovieFileInfo, MovieListResponse,
     MovieSummary,
 };
+pub use person::{KnownForMovie, PersonDetail};
 pub use root::RootResponse;

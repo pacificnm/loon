@@ -8,6 +8,7 @@ pub mod enrichment;
 pub mod filename_guess;
 pub mod library;
 pub mod media_file;
+pub mod person;
 pub mod scan_events;
 pub mod scan_service;
 pub mod scan_state;

@@ -20,6 +20,7 @@ export interface CastMember {
   name: string;
   character?: string;
   profile_url?: string;
+  tmdb_person_id?: number;
 }
 
 export interface CrewMember {
@@ -133,4 +134,26 @@ export interface LibraryStatusResponse {
   movies_count: number;
   scan_in_progress: boolean;
   progress?: ScanProgress | null;
+}
+
+export interface KnownForMovie {
+  slug: string;
+  title: string;
+  year?: number;
+  poster_url?: string;
+  character?: string;
+}
+
+export interface PersonDetail {
+  tmdb_person_id: number;
+  name: string;
+  biography?: string;
+  birthday?: string;
+  deathday?: string;
+  place_of_birth?: string;
+  profile_url?: string;
+  known_for_department?: string;
+  gender?: number;
+  also_known_as: string[];
+  known_for: KnownForMovie[];
 }

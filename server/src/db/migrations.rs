@@ -15,5 +15,10 @@ pub fn loon_migrations() -> Vec<Box<dyn Migration>> {
             include_str!("../../migrations/002_tmdb_locked.sql"),
             "-- rollback 002_tmdb_locked",
         )),
+        Box::new(SqlMigration::new(
+            "003_people",
+            include_str!("../../migrations/003_people.sql"),
+            "-- rollback 003_people",
+        )),
     ]
 }

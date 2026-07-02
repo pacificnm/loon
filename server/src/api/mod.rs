@@ -8,6 +8,7 @@ pub mod health;
 pub mod library;
 pub mod match_handler;
 pub mod movies;
+pub mod people;
 pub mod progress;
 pub mod root;
 pub mod search;

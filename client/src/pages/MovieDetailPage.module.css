@@ -207,6 +207,10 @@
   border-color: var(--focus);
 }
 
+.castCardClickable {
+  cursor: pointer;
+}
+
 .castPhotoFrame {
   width: 100%;
   aspect-ratio: 2 / 3;

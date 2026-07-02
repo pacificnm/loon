@@ -174,6 +174,7 @@ async fn mount_tmdb_narnia_mocks(tmdb: &MockServer) {
         .and(path(format!("/movie/{NARNIA_TMDB_ID}/credits")))
         .respond_with(ResponseTemplate::new(200).set_body_json(json!({
             "cast": [{
+                "id": 123,
                 "name": "Georgie Henley",
                 "character": "Lucy Pevensie",
                 "order": 0,

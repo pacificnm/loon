@@ -7,6 +7,7 @@ import type {
   MovieDetail,
   MovieListResponse,
   MovieSummary,
+  PersonDetail,
   ScanStreamEvent,
   SearchResponse,
 } from './types';
@@ -108,6 +109,13 @@ export async function setMovieTmdbMatch(
     },
   );
   return normalizeMovieDetail(detail);
+}
+
+export async function fetchPerson(baseUrl: string, tmdbPersonId: number): Promise<PersonDetail> {
+  return request<PersonDetail>(
+    baseUrl,
+    `/api/people/${encodeURIComponent(String(tmdbPersonId))}`,
+  );
 }
 
 export async function searchMovies(

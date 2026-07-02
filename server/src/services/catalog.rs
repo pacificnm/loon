@@ -309,6 +309,7 @@ fn map_cast(credits: &[PersonCredit]) -> Vec<CastMemberDto> {
                     ImageSize::W185,
                 )
             }),
+            tmdb_person_id: credit.tmdb_person_id,
         })
         .collect()
 }

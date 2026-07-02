@@ -10,6 +10,7 @@ use serde::Serialize;
 
 use crate::models::{CastMemberDto, CrewMemberDto};
 use crate::services::catalog::LoonMovieRecord;
+use crate::services::person::PersonRecord;
 
 /// Existing file row used for incremental scan decisions.
 #[derive(Debug, Clone)]
@@ -614,6 +615,60 @@ impl LibraryRepository {
             Ok(true)
         })
     }
+
+    /// Loads a cached person by TMDB id.
+    pub fn get_person(&self, tmdb_person_id: u32) -> NestResult<Option<PersonRecord>> {
+        self.with_db(|db| {
+            db.query_row(
+                "SELECT tmdb_person_id, name, biography, birthday, deathday, place_of_birth,
+                        profile_path, known_for_department, gender, also_known_as_json, updated_at
+                 FROM people WHERE tmdb_person_id = ?1",
+                [tmdb_person_id],
+                |row| row_to_person(row),
+            )
+            .optional()
+        })
+    }
+
+    /// Inserts or updates a cached person row.
+    pub fn upsert_person(&self, record: &PersonRecord) -> NestResult<()> {
+        let also_known_as_json =
+            serde_json::to_string(&record.also_known_as).map_err(json_error)?;
+
+        self.with_db(|db| {
+            db.execute(
+                "INSERT INTO people (
+                    tmdb_person_id, name, biography, birthday, deathday, place_of_birth,
+                    profile_path, known_for_department, gender, also_known_as_json, updated_at
+                 ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)
+                 ON CONFLICT(tmdb_person_id) DO UPDATE SET
+                    name = excluded.name,
+                    biography = excluded.biography,
+                    birthday = excluded.birthday,
+                    deathday = excluded.deathday,
+                    place_of_birth = excluded.place_of_birth,
+                    profile_path = excluded.profile_path,
+                    known_for_department = excluded.known_for_department,
+                    gender = excluded.gender,
+                    also_known_as_json = excluded.also_known_as_json,
+                    updated_at = excluded.updated_at",
+                params![
+                    record.tmdb_person_id,
+                    record.name,
+                    record.biography,
+                    record.birthday,
+                    record.deathday,
+                    record.place_of_birth,
+                    record.profile_path,
+                    record.known_for_department,
+                    record.gender,
+                    also_known_as_json,
+                    record.updated_at as i64,
+                ],
+            )?;
+            Ok(())
+        })
+    }
 }
 
 fn collect_records(
@@ -662,6 +717,26 @@ fn row_to_record(row: &rusqlite::Row<'_>) -> Result<LoonMovieRecord, rusqlite::E
         is_favorite: is_favorite > 0,
         watch_progress_seconds: position.map(|value| value as u32),
         watch_duration_seconds: duration.map(|value| value as u32),
+    })
+}
+
+fn row_to_person(row: &rusqlite::Row<'_>) -> Result<PersonRecord, rusqlite::Error> {
+    let also_known_as_json: String = row.get(9)?;
+    let also_known_as: Vec<String> =
+        serde_json::from_str(&also_known_as_json).unwrap_or_default();
+
+    Ok(PersonRecord {
+        tmdb_person_id: row.get::<_, i64>(0)? as u32,
+        name: row.get(1)?,
+        biography: row.get(2)?,
+        birthday: row.get(3)?,
+        deathday: row.get(4)?,
+        place_of_birth: row.get(5)?,
+        profile_path: row.get(6)?,
+        known_for_department: row.get(7)?,
+        gender: row.get(8)?,
+        also_known_as,
+        updated_at: row.get::<_, i64>(10)? as u64,
     })
 }
 
