@@ -26,9 +26,9 @@ describe('fetchMovies', () => {
       }),
     );
 
-    const movies = await fetchMovies('http://localhost:3000');
-    expect(movies).toHaveLength(1);
-    expect(movies[0]?.slug).toBe('alien-1979');
+    const response = await fetchMovies('http://localhost:3000');
+    expect(response.movies).toHaveLength(1);
+    expect(response.movies[0]?.slug).toBe('alien-1979');
   });
 
   it('throws LoonApiError on server error envelope', async () => {

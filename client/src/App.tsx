@@ -1,91 +1,50 @@
-import { useCallback, useEffect, useState } from 'react';
-import { fetchMovies } from './api/client';
-import type { MovieSummary } from './api/types';
-import { ContentRow } from './components/ContentRow';
-import { getServerUrl, resolveArtworkUrl, streamUrl } from './config';
+import { useCallback, useState } from 'react';
+import { HashRouter, Navigate, Route, Routes, useParams } from 'react-router-dom';
+import { AppShell } from './components/layout/AppShell';
 import { useWebOsLifecycle } from './platform/useWebOsLifecycle';
-import { VideoPlayer } from './player/VideoPlayer';
-import styles from './App.module.css';
+import { AdminPage } from './pages/AdminPage';
+import { FavoritesPage } from './pages/FavoritesPage';
+import { GenresPage } from './pages/GenresPage';
+import { MovieDetailPage } from './pages/MovieDetailPage';
+import { MoviesPage } from './pages/MoviesPage';
+import { PlayerPage } from './pages/PlayerPage';
+import { SearchPage } from './pages/SearchPage';
 
-type Screen =
-  | { kind: 'browse' }
-  | { kind: 'player'; movie: MovieSummary };
+function GenreMoviesRoute({ focusEpoch }: { focusEpoch: number }) {
+  const { name = '' } = useParams();
+  return <MoviesPage focusEpoch={focusEpoch} genre={decodeURIComponent(name)} />;
+}
 
-export function App() {
-  const server = getServerUrl();
-  const [screen, setScreen] = useState<Screen>({ kind: 'browse' });
-  const [movies, setMovies] = useState<MovieSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+function AppRoutes() {
   const [focusEpoch, setFocusEpoch] = useState(0);
 
   const handleRelaunch = useCallback(() => {
-    // Return to browse and restore spatial focus after Home → relaunch.
-    setScreen({ kind: 'browse' });
     setFocusEpoch((epoch) => epoch + 1);
   }, []);
 
   useWebOsLifecycle(handleRelaunch);
 
-  const loadMovies = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const list = await fetchMovies(server);
-      setMovies(list);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load movies';
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }, [server]);
-
-  useEffect(() => {
-    void loadMovies();
-  }, [loadMovies]);
-
-  const resolveArtwork = useCallback(
-    (path: string | undefined) => resolveArtworkUrl(path, server),
-    [server],
-  );
-
-  if (screen.kind === 'player') {
-    return (
-      <VideoPlayer
-        src={streamUrl(server, screen.movie.slug)}
-        title={screen.movie.title}
-        onBack={() => setScreen({ kind: 'browse' })}
-      />
-    );
-  }
-
   return (
-    <main className={styles.shell}>
-      <header className={styles.header}>
-        <span className={styles.logo}>Loon</span>
-        <span className={styles.hint}>Arrow keys + Enter · Back to exit player</span>
-      </header>
+    <Routes>
+      <Route element={<AppShell focusEpoch={focusEpoch} />}>
+        <Route index element={<MoviesPage focusEpoch={focusEpoch} />} />
+        <Route path="search" element={<SearchPage focusEpoch={focusEpoch} />} />
+        <Route path="genres" element={<GenresPage focusEpoch={focusEpoch} />} />
+        <Route path="genre/:name" element={<GenreMoviesRoute focusEpoch={focusEpoch} />} />
+        <Route path="favorites" element={<FavoritesPage focusEpoch={focusEpoch} />} />
+        <Route path="admin" element={<AdminPage />} />
+        <Route path="movie/:slug" element={<MovieDetailPage />} />
+      </Route>
+      <Route path="play/:slug" element={<PlayerPage />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
 
-      {loading ? <p className={styles.status}>Loading movies…</p> : null}
-      {error ? (
-        <div className={styles.error}>
-          <p>{error}</p>
-          <button type="button" onClick={() => void loadMovies()}>
-            Retry
-          </button>
-        </div>
-      ) : null}
-
-      {!loading && !error ? (
-        <ContentRow
-          title="Movies"
-          movies={movies}
-          resolveArtwork={resolveArtwork}
-          focusEpoch={focusEpoch}
-          onSelect={(movie) => setScreen({ kind: 'player', movie })}
-        />
-      ) : null}
-    </main>
+export function App() {
+  return (
+    <HashRouter>
+      <AppRoutes />
+    </HashRouter>
   );
 }

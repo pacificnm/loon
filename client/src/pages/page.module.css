@@ -1,0 +1,97 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 88px);
+  overflow: hidden;
+}
+
+.heading {
+  margin: 0;
+  padding: 16px 40px 8px;
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.status {
+  padding: 0 40px;
+  font-size: 22px;
+  color: var(--muted);
+}
+
+.error {
+  padding: 16px 40px;
+}
+
+.error p,
+.errorText {
+  font-size: 22px;
+  color: #f87171;
+  margin: 0;
+  padding: 0 40px;
+}
+
+.error button {
+  margin-top: 12px;
+  background: var(--primary);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 20px;
+}
+
+.searchBox {
+  padding: 8px 40px 16px;
+}
+
+.searchInput {
+  width: min(720px, 100%);
+  font-size: 24px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.searchInputFocused {
+  border-color: var(--focus);
+  outline: none;
+}
+
+.genreList {
+  padding: 8px 40px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.genreItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: min(720px, 100%);
+  padding: 16px 20px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.genreFocused {
+  border-color: var(--focus);
+}
+
+.genreCount {
+  color: var(--muted);
+  font-size: 20px;
+}
+
+.adminActions {
+  display: flex;
+  gap: 12px;
+  padding: 16px 40px;
+}

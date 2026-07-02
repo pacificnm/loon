@@ -1,4 +1,13 @@
-import type { ApiErrorBody, MovieListResponse, MovieSummary } from './types';
+import type {
+  ApiErrorBody,
+  BrowseResponse,
+  FavoriteResponse,
+  GenresResponse,
+  MovieDetail,
+  MovieListResponse,
+  MovieSummary,
+  SearchResponse,
+} from './types';
 
 export class LoonApiError extends Error {
   readonly code: string;
@@ -10,8 +19,12 @@ export class LoonApiError extends Error {
   }
 }
 
-async function request<T>(baseUrl: string, path: string): Promise<T> {
-  const response = await fetch(`${baseUrl}${path}`);
+async function request<T>(
+  baseUrl: string,
+  path: string,
+  init?: RequestInit,
+): Promise<T> {
+  const response = await fetch(`${baseUrl}${path}`, init);
   const text = await response.text();
   if (!response.ok) {
     try {
@@ -34,7 +47,89 @@ async function request<T>(baseUrl: string, path: string): Promise<T> {
   }
 }
 
-export async function fetchMovies(baseUrl: string): Promise<MovieSummary[]> {
-  const body = await request<MovieListResponse>(baseUrl, '/api/movies');
-  return body.movies;
+export interface ListMoviesOptions {
+  page?: number;
+  limit?: number;
+  sort?: 'title' | 'year' | 'recently_added';
+  genre?: string;
+}
+
+export async function fetchMovies(
+  baseUrl: string,
+  options: ListMoviesOptions = {},
+): Promise<MovieListResponse> {
+  const params = new URLSearchParams();
+  if (options.page) {
+    params.set('page', String(options.page));
+  }
+  if (options.limit) {
+    params.set('limit', String(options.limit));
+  }
+  if (options.sort) {
+    params.set('sort', options.sort);
+  }
+  if (options.genre) {
+    params.set('genre', options.genre);
+  }
+  const query = params.toString();
+  return request<MovieListResponse>(baseUrl, `/api/movies${query ? `?${query}` : ''}`);
+}
+
+export async function fetchMovie(baseUrl: string, slug: string): Promise<MovieDetail> {
+  return request<MovieDetail>(baseUrl, `/api/movies/${encodeURIComponent(slug)}`);
+}
+
+export async function searchMovies(
+  baseUrl: string,
+  query: string,
+  limit = 20,
+): Promise<SearchResponse> {
+  const params = new URLSearchParams({ q: query, limit: String(limit) });
+  return request<SearchResponse>(baseUrl, `/api/search?${params}`);
+}
+
+export async function fetchGenres(baseUrl: string): Promise<GenresResponse> {
+  return request<GenresResponse>(baseUrl, '/api/genres');
+}
+
+export async function fetchBrowse(baseUrl: string): Promise<BrowseResponse> {
+  return request<BrowseResponse>(baseUrl, '/api/browse');
+}
+
+export async function fetchFavorites(baseUrl: string): Promise<MovieSummary[]> {
+  const browse = await fetchBrowse(baseUrl);
+  const row = browse.rows.find((entry) => entry.row_type === 'favorites');
+  return row?.movies ?? [];
+}
+
+export async function setFavorite(
+  baseUrl: string,
+  slug: string,
+  favorite?: boolean,
+): Promise<FavoriteResponse> {
+  const init: RequestInit = {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+  };
+  if (favorite !== undefined) {
+    init.body = JSON.stringify({ favorite });
+  }
+  return request<FavoriteResponse>(
+    baseUrl,
+    `/api/movies/${encodeURIComponent(slug)}/favorite`,
+    init,
+  );
+}
+
+export async function fetchSimilarMovies(
+  baseUrl: string,
+  detail: MovieDetail,
+  limit = 12,
+): Promise<MovieSummary[]> {
+  const genre = detail.genres[0];
+  if (!genre) {
+    return [];
+  }
+  const list = await fetchMovies(baseUrl, { genre, limit: limit + 1, page: 1 });
+  return list.movies.filter((movie) => movie.slug !== detail.slug).slice(0, limit);
 }

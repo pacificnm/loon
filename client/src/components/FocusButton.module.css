@@ -1,0 +1,30 @@
+.button {
+  background: var(--surface);
+  color: var(--text);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.button.selected {
+  color: var(--primary);
+}
+
+.button.focused,
+.tile.focused {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35);
+  outline: none;
+}
+
+.tile {
+  border: 2px solid transparent;
+  border-radius: 12px;
+  transition: transform 150ms ease-out, border-color 150ms ease-out;
+}
+
+.tile.focused {
+  transform: scale(1.02);
+}

@@ -1,26 +1,27 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useRef, type RefObject } from 'react';
 import {
   FocusContext,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
 import type { MovieSummary } from '../api/types';
 import { PosterCard } from './PosterCard';
-import styles from './ContentRow.module.css';
+import styles from './HorizontalRow.module.css';
 
-function posterFocusKey(slug: string): string {
-  return `poster-${slug}`;
+function cardFocusKey(prefix: string, slug: string): string {
+  return `${prefix}-${slug}`;
 }
 
-interface FocusablePosterProps {
+interface FocusableCardProps {
+  prefix: string;
   movie: MovieSummary;
   posterUrl?: string;
-  onSelect: (movie: MovieSummary) => void;
   rowRef: RefObject<HTMLDivElement>;
+  onSelect: (movie: MovieSummary) => void;
 }
 
-function FocusablePoster({ movie, posterUrl, onSelect, rowRef }: FocusablePosterProps) {
+function FocusableCard({ prefix, movie, posterUrl, rowRef, onSelect }: FocusableCardProps) {
   const { ref, focused } = useFocusable({
-    focusKey: posterFocusKey(movie.slug),
+    focusKey: cardFocusKey(prefix, movie.slug),
     onEnterPress: () => onSelect(movie),
     onFocus: (layout) => {
       const row = rowRef.current;
@@ -46,50 +47,49 @@ function FocusablePoster({ movie, posterUrl, onSelect, rowRef }: FocusablePoster
   );
 }
 
-interface ContentRowProps {
+interface HorizontalRowProps {
   title: string;
+  prefix: string;
   movies: MovieSummary[];
   resolveArtwork: (path: string | undefined) => string | undefined;
-  focusEpoch?: number;
   onSelect: (movie: MovieSummary) => void;
 }
 
-export function ContentRow({
+export function HorizontalRow({
   title,
+  prefix,
   movies,
   resolveArtwork,
-  focusEpoch = 0,
   onSelect,
-}: ContentRowProps) {
+}: HorizontalRowProps) {
   const rowRef = useRef<HTMLDivElement>(null);
-  const firstFocusKey = movies[0] ? posterFocusKey(movies[0].slug) : undefined;
+  const firstKey = movies[0] ? cardFocusKey(prefix, movies[0].slug) : undefined;
 
-  const { ref, focusKey, focusSelf } = useFocusable({
+  const { ref, focusKey } = useFocusable({
     focusable: false,
     trackChildren: true,
-    focusKey: 'movies-row',
-    preferredChildFocusKey: firstFocusKey,
+    focusKey: `row-${prefix}`,
+    preferredChildFocusKey: firstKey,
   });
 
-  useEffect(() => {
-    if (movies.length > 0) {
-      focusSelf();
-    }
-  }, [movies, focusSelf, focusEpoch]);
+  if (movies.length === 0) {
+    return null;
+  }
 
   return (
-    <section className={styles.rowSection}>
-      <h1 className={styles.rowTitle}>{title}</h1>
+    <section className={styles.section}>
+      <h2 className={styles.title}>{title}</h2>
       <FocusContext.Provider value={focusKey}>
-        <div ref={ref} className={styles.rowScroller}>
+        <div ref={ref} className={styles.scroller}>
           <div ref={rowRef} className={styles.row}>
             {movies.map((movie) => (
-              <FocusablePoster
+              <FocusableCard
                 key={movie.slug}
+                prefix={prefix}
                 movie={movie}
                 posterUrl={resolveArtwork(movie.poster_url)}
-                onSelect={onSelect}
                 rowRef={rowRef}
+                onSelect={onSelect}
               />
             ))}
           </div>

@@ -1,6 +1,6 @@
 # Loon webOS Client — UI Plan
 
-## Status: W0 implemented (TV verification pending)
+## Status: W1 layout — vertical browse, top nav, movie detail
 
 TV-first UI specification for the **Loon webOS** client. All client source lives under this `client/` folder.
 
