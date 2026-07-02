@@ -20,11 +20,6 @@ impl LoonThemeModule {
             theme: loon_dark(),
         }
     }
-
-    /// Creates a module with a custom theme definition.
-    pub fn with_theme(theme: ThemeDefinition) -> Self {
-        Self { theme }
-    }
 }
 
 impl Module for LoonThemeModule {
