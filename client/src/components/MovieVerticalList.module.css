@@ -19,13 +19,12 @@
   border-radius: 12px;
   border: 2px solid transparent;
   background: var(--surface);
-  transition: transform 150ms ease-out, border-color 150ms ease-out;
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
 }
 
 .row.focused {
   border-color: var(--focus);
-  transform: scale(1.01);
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.25);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35);
 }
 
 .posterFrame {

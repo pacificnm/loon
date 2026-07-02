@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, type RefObject } from 'react';
 import {
   FocusContext,
   setFocus,
+  updateAllLayouts,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
 import type { MovieSummary } from '../api/types';
@@ -21,17 +22,19 @@ function scrollItemIntoView(list: HTMLElement, layout: { y: number; height: numb
   const listRect = list.getBoundingClientRect();
   const itemTop = layout.y;
   const itemBottom = layout.y + layout.height;
-  if (itemTop < listRect.top) {
+  if (itemTop < listRect.top + 8) {
     list.scrollTop -= listRect.top - itemTop + 16;
-  } else if (itemBottom > listRect.bottom) {
+  } else if (itemBottom > listRect.bottom - 8) {
     list.scrollTop += itemBottom - listRect.bottom + 16;
   }
+  updateAllLayouts();
 }
 
 function scrollSectionIntoView(list: HTMLElement, section: HTMLElement) {
   const listRect = list.getBoundingClientRect();
   const sectionRect = section.getBoundingClientRect();
   list.scrollTop += sectionRect.top - listRect.top;
+  updateAllLayouts();
 }
 
 interface MovieRowProps {
@@ -47,6 +50,13 @@ function MovieRow({ movie, server, listRef, onSelect }: MovieRowProps) {
   const { ref, focused } = useFocusable({
     focusKey: itemFocusKey(movie.slug),
     onEnterPress: () => onSelect(movie),
+    onArrowPress: (direction) => {
+      // Keep vertical navigation in the list; use the index rail explicitly.
+      if (direction === 'right') {
+        return false;
+      }
+      return true;
+    },
     onFocus: (layout) => {
       const list = listRef.current;
       if (list) {
@@ -106,24 +116,26 @@ function LetterBlock({
   );
 }
 
-function IndexLetter({
+function DisabledIndexLetter({ letter }: { letter: string }) {
+  return (
+    <span className={`${styles.indexLetter} ${styles.indexDisabled}`} aria-hidden>
+      {letter}
+    </span>
+  );
+}
+
+function EnabledIndexLetter({
   letter,
-  enabled,
   onJump,
 }: {
   letter: string;
-  enabled: boolean;
   onJump: (letter: string) => void;
 }) {
   const { ref, focused } = useFocusable({
     focusKey: `index-${letter}`,
-    focusable: enabled,
     onEnterPress: () => onJump(letter),
+    onArrowPress: (direction) => direction !== 'left',
   });
-
-  if (!enabled) {
-    return <span className={`${styles.indexLetter} ${styles.indexDisabled}`}>{letter}</span>;
-  }
 
   return (
     <button
@@ -205,16 +217,15 @@ export function MovieAlphabetList({
             />
           ))}
         </div>
-        <aside className={styles.indexRail}>
+        <aside className={styles.indexRail} aria-label="Jump to letter">
           <div className={styles.indexLetters}>
-            {ALPHABET_LETTERS.map((letter) => (
-              <IndexLetter
-                key={letter}
-                letter={letter}
-                enabled={activeLetters.has(letter)}
-                onJump={scrollToLetter}
-              />
-            ))}
+            {ALPHABET_LETTERS.map((letter) =>
+              activeLetters.has(letter) ? (
+                <EnabledIndexLetter key={letter} letter={letter} onJump={scrollToLetter} />
+              ) : (
+                <DisabledIndexLetter key={letter} letter={letter} />
+              ),
+            )}
           </div>
         </aside>
       </div>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import {
   FocusContext,
+  updateAllLayouts,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
 import type { MovieSummary } from '../api/types';
@@ -37,6 +38,7 @@ function MovieRow({ movie, server, listRef, onSelect }: MovieRowProps) {
       } else if (itemBottom > listRect.bottom) {
         list.scrollTop += itemBottom - listRect.bottom + 16;
       }
+      updateAllLayouts();
     },
   });
 

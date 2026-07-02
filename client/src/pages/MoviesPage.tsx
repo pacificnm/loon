@@ -38,23 +38,25 @@ export function MoviesPage({ focusEpoch, genre }: MoviesPageProps) {
   return (
     <div className={styles.page}>
       <h1 className={styles.heading}>{genre ? genre : 'Movies'}</h1>
-      {loading ? <p className={styles.status}>Loading movies…</p> : null}
-      {error ? (
-        <div className={styles.error}>
-          <p>{error}</p>
-          <button type="button" onClick={() => void load()}>
-            Retry
-          </button>
-        </div>
-      ) : null}
-      {!loading && !error ? (
-        <MovieAlphabetList
-          movies={movies}
-          server={server}
-          focusEpoch={focusEpoch}
-          onSelect={(movie) => navigate(`/movie/${movie.slug}`)}
-        />
-      ) : null}
+      <div className={styles.content}>
+        {loading ? <p className={styles.status}>Loading movies…</p> : null}
+        {error ? (
+          <div className={styles.error}>
+            <p>{error}</p>
+            <button type="button" onClick={() => void load()}>
+              Retry
+            </button>
+          </div>
+        ) : null}
+        {!loading && !error ? (
+          <MovieAlphabetList
+            movies={movies}
+            server={server}
+            focusEpoch={focusEpoch}
+            onSelect={(movie) => navigate(`/movie/${movie.slug}`)}
+          />
+        ) : null}
+      </div>
     </div>
   );
 }

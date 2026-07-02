@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { HashRouter, Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { useWebOsLifecycle } from './platform/useWebOsLifecycle';
+import { useWebOsBack } from './platform/useWebOsBack';
 import { AdminPage } from './pages/AdminPage';
 import { FavoritesPage } from './pages/FavoritesPage';
 import { GenresPage } from './pages/GenresPage';
@@ -23,6 +24,7 @@ function AppRoutes() {
   }, []);
 
   useWebOsLifecycle(handleRelaunch);
+  useWebOsBack();
 
   return (
     <Routes>

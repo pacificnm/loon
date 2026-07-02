@@ -1,18 +1,18 @@
 .shell {
   display: flex;
-  gap: 16px;
-  height: 100%;
-  padding: 0 24px 32px 40px;
+  gap: 12px;
+  flex: 1;
   min-height: 0;
-  overflow: hidden;
+  padding: 0 16px 24px 8px;
 }
 
 .list {
   flex: 1;
   min-width: 0;
   height: 100%;
+  overflow-x: hidden;
   overflow-y: auto;
-  padding-right: 8px;
+  padding: 0 12px 0 8px;
 }
 
 .section {
@@ -38,16 +38,16 @@
   display: flex;
   gap: 20px;
   padding: 12px;
+  margin: 0;
   border-radius: 12px;
   border: 2px solid transparent;
   background: var(--surface);
-  transition: transform 150ms ease-out, border-color 150ms ease-out;
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
 }
 
 .row.focused {
   border-color: var(--focus);
-  transform: scale(1.01);
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.25);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35);
 }
 
 .posterFrame {
@@ -93,7 +93,7 @@
 }
 
 .summary {
-  margin: 10px  0 0;
+  margin: 10px 0 0;
   font-size: 20px;
   line-height: 1.35;
   display: -webkit-box;
@@ -103,7 +103,7 @@
 }
 
 .indexRail {
-  flex: 0 0 48px;
+  flex: 0 0 40px;
   display: flex;
   justify-content: center;
   padding-top: 4px;
@@ -118,26 +118,28 @@
 }
 
 .indexLetter {
-  width: 36px;
-  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 26px;
   padding: 0;
   border: 2px solid transparent;
   border-radius: 6px;
   background: transparent;
   color: var(--text);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1;
-  cursor: pointer;
 }
 
-.indexEnabled:hover {
-  color: var(--primary);
+.indexEnabled {
+  cursor: pointer;
 }
 
 .indexDisabled {
   color: rgba(148, 163, 184, 0.35);
-  cursor: default;
+  pointer-events: none;
 }
 
 .indexFocused {

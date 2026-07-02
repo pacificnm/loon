@@ -12,6 +12,7 @@ init({
   debug: import.meta.env.DEV,
   visualDebug: false,
   distanceCalculationMethod: 'center',
+  useGetBoundingClientRect: true,
 });
 
 function RootFocusWrapper({ children }: { children: React.ReactNode }) {
