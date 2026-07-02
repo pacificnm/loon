@@ -11,6 +11,7 @@ import type {
   SearchResponse,
 } from './types';
 import { readSseStream } from './sse';
+import { normalizeMovieDetail } from './normalize';
 
 export class LoonApiError extends Error {
   readonly code: string;
@@ -79,7 +80,11 @@ export async function fetchMovies(
 }
 
 export async function fetchMovie(baseUrl: string, slug: string): Promise<MovieDetail> {
-  return request<MovieDetail>(baseUrl, `/api/movies/${encodeURIComponent(slug)}`);
+  const detail = await request<MovieDetail>(
+    baseUrl,
+    `/api/movies/${encodeURIComponent(slug)}`,
+  );
+  return normalizeMovieDetail(detail);
 }
 
 export async function searchMovies(

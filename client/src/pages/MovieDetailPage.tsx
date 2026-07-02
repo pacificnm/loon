@@ -121,7 +121,7 @@ export function MovieDetailPage() {
                 <p className={styles.original}>{detail.original_title}</p>
               ) : null}
               <p className={styles.meta}>
-                {[detail.year, runtime, detail.genres.join(' · ')].filter(Boolean).join(' · ')}
+                {[detail.year, runtime, (detail.genres ?? []).join(' · ')].filter(Boolean).join(' · ')}
               </p>
               {detail.summary ? <p className={styles.summary}>{detail.summary}</p> : null}
               <div className={styles.actions}>
@@ -141,7 +141,7 @@ export function MovieDetailPage() {
 
           <FileDetailsSection detail={detail} />
 
-          {detail.cast.length > 0 ? <CastRow cast={detail.cast} /> : null}
+          {detail.cast && detail.cast.length > 0 ? <CastRow cast={detail.cast} /> : null}
 
           {similar.length > 0 ? (
             <HorizontalRow

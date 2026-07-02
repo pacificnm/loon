@@ -1,0 +1,52 @@
+.shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: var(--bg);
+}
+
+.panel {
+  width: min(960px, 100%);
+  padding: 32px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 2px solid rgba(248, 113, 113, 0.35);
+}
+
+.title {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 700;
+  color: #f87171;
+}
+
+.message {
+  margin: 16px 0 0;
+  font-size: 22px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.details {
+  margin: 20px 0 0;
+  padding: 16px;
+  max-height: 280px;
+  overflow: auto;
+  border-radius: 10px;
+  background: #0b1220;
+  color: #cbd5e1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 16px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}

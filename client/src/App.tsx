@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { HashRouter, Navigate, Route, Routes, useParams } from 'react-router-dom';
+import { HashRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { AppShell } from './components/layout/AppShell';
 import { useWebOsLifecycle } from './platform/useWebOsLifecycle';
 import { useWebOsBack } from './platform/useWebOsBack';
@@ -46,7 +47,17 @@ function AppRoutes() {
 export function App() {
   return (
     <HashRouter>
-      <AppRoutes />
+      <AppWithErrorBoundary />
     </HashRouter>
+  );
+}
+
+function AppWithErrorBoundary() {
+  const location = useLocation();
+
+  return (
+    <ErrorBoundary resetKeys={[location.pathname, location.search, location.hash]}>
+      <AppRoutes />
+    </ErrorBoundary>
   );
 }

@@ -6,6 +6,7 @@ import {
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
 import { App } from './App';
+import { GlobalErrorShell } from './components/GlobalErrorShell';
 import './theme/tokens.css';
 
 init({
@@ -34,8 +35,10 @@ function RootFocusWrapper({ children }: { children: React.ReactNode }) {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RootFocusWrapper>
-      <App />
-    </RootFocusWrapper>
+    <GlobalErrorShell>
+      <RootFocusWrapper>
+        <App />
+      </RootFocusWrapper>
+    </GlobalErrorShell>
   </StrictMode>,
 );

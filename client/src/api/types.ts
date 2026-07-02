@@ -52,7 +52,7 @@ export interface MovieDetail {
   watch_progress_seconds?: number;
   tmdb_id?: string | null;
   imdb_id?: string | null;
-  file: MovieFileInfo;
+  file?: MovieFileInfo | null;
   stream_url: string;
 }
 
