@@ -332,7 +332,7 @@ Save watch position. Body `{ "position_seconds", "duration_seconds"? }`. Clears 
 
 Triggers a **background** rescan of the media library. Returns `202 Accepted` immediately.
 
-Body (optional): `{ "full": true }` to force TMDB re-fetch for all files. Default incremental scan skips TMDB for unchanged files.
+Body (optional): `{ "full": true }` refreshes TMDB metadata for movies that are not manually locked. Movies with a stored `tmdb_id` are re-fetched by id (never re-guessed from the filename). Movies corrected via `PUT /api/movies/:slug/match` are locked and skipped. Default incremental scan only touches new or changed files.
 
 ---
 

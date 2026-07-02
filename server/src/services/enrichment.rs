@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use nest_media::{MetadataProvider, MovieSearchQuery, MovieSearchResult};
+use nest_media::{ExternalMediaId, MetadataProvider, MovieSearchQuery, MovieSearchResult};
 use nest_media_library::{MovieScanCandidate, ScanResult};
 use nest_tmdb::ImageSize;
 use tracing::{debug, info, warn};
@@ -80,6 +80,34 @@ pub async fn enrich_candidate(
                 path = %path,
                 error = %error.message(),
                 "TMDB metadata fetch failed"
+            );
+        }
+    }
+}
+
+/// Fetches TMDB metadata for a known movie id (no title search).
+pub async fn enrich_candidate_by_tmdb_id(
+    candidate: &mut MovieScanCandidate,
+    tmdb_id: u32,
+    tmdb: &TmdbRuntime,
+    artwork: &mut ScanArtworkMap,
+) {
+    let path = candidate.file.relative_path.clone();
+    let external_id = ExternalMediaId::new(format!("tmdb:{tmdb_id}"));
+
+    match tmdb.provider.fetch_movie(external_id).await {
+        Ok(fetch) => {
+            if let Some(urls) = artwork_urls(tmdb, &fetch.poster_path, &fetch.backdrop_path).await {
+                artwork.insert(path.clone(), urls);
+            }
+            candidate.metadata = Some(fetch.metadata);
+        }
+        Err(error) => {
+            warn!(
+                path = %path,
+                tmdb_id,
+                error = %error.message(),
+                "TMDB fetch by id failed"
             );
         }
     }

@@ -141,7 +141,7 @@ impl LibraryRepository {
             let mut stmt = db.prepare(
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
-                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, m.tmdb_locked, lf.scanned_at,
                         lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
@@ -166,7 +166,7 @@ impl LibraryRepository {
             let mut stmt = db.prepare(
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
-                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, m.tmdb_locked, lf.scanned_at,
                         lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
@@ -191,7 +191,7 @@ impl LibraryRepository {
             let mut stmt = db.prepare(
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
-                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, m.tmdb_locked, lf.scanned_at,
                         lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
@@ -232,8 +232,8 @@ impl LibraryRepository {
                     "INSERT INTO movies (
                         id, slug, title, original_title, year, runtime_seconds, summary,
                         tmdb_id, imdb_id, cast_json, crew_json, poster_url, backdrop_url,
-                        created_at, updated_at
-                     ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)
+                        tmdb_locked, created_at, updated_at
+                     ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)
                      ON CONFLICT(id) DO UPDATE SET
                         slug = excluded.slug,
                         title = excluded.title,
@@ -247,6 +247,7 @@ impl LibraryRepository {
                         crew_json = excluded.crew_json,
                         poster_url = excluded.poster_url,
                         backdrop_url = excluded.backdrop_url,
+                        tmdb_locked = excluded.tmdb_locked,
                         updated_at = excluded.updated_at",
                     params![
                         record.media_id,
@@ -262,6 +263,7 @@ impl LibraryRepository {
                         crew_json,
                         record.poster_url,
                         record.backdrop_url,
+                        i64::from(record.tmdb_locked),
                         now,
                         now,
                     ],
@@ -369,7 +371,7 @@ impl LibraryRepository {
             format!(
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
-                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, m.tmdb_locked, lf.scanned_at,
                         lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
@@ -385,7 +387,7 @@ impl LibraryRepository {
             format!(
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
-                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, m.tmdb_locked, lf.scanned_at,
                         lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
@@ -432,7 +434,7 @@ impl LibraryRepository {
             let mut stmt = db.prepare(
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
-                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, m.tmdb_locked, lf.scanned_at,
                         lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
@@ -475,7 +477,7 @@ impl LibraryRepository {
             let mut stmt = db.prepare(
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
-                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, m.tmdb_locked, lf.scanned_at,
                         lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
@@ -509,7 +511,7 @@ impl LibraryRepository {
             let mut stmt = db.prepare(
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
-                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, m.tmdb_locked, lf.scanned_at,
                         lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
@@ -632,10 +634,10 @@ fn row_to_record(row: &rusqlite::Row<'_>) -> Result<LoonMovieRecord, rusqlite::E
     let cast: Vec<CastMemberDto> = serde_json::from_str(&cast_json).unwrap_or_default();
     let crew: Vec<CrewMemberDto> = serde_json::from_str(&crew_json).unwrap_or_default();
     let runtime_seconds: Option<i64> = row.get(6)?;
-    let is_favorite: i64 = row.get(17)?;
-    let position: Option<i64> = row.get(18)?;
-    let duration: Option<i64> = row.get(19)?;
-    let genres = parse_genres(row.get(20)?);
+    let is_favorite: i64 = row.get(18)?;
+    let position: Option<i64> = row.get(19)?;
+    let duration: Option<i64> = row.get(20)?;
+    let genres = parse_genres(row.get(21)?);
 
     Ok(LoonMovieRecord {
         media_id: row.get(0)?,
@@ -653,9 +655,10 @@ fn row_to_record(row: &rusqlite::Row<'_>) -> Result<LoonMovieRecord, rusqlite::E
         crew,
         tmdb_id: row.get(12)?,
         imdb_id: row.get(13)?,
-        scanned_at: row.get::<_, i64>(14)? as u64,
-        size_bytes: Some(row.get::<_, i64>(15)? as u64),
-        modified_secs: row.get(16)?,
+        tmdb_locked: row.get::<_, i64>(14)? > 0,
+        scanned_at: row.get::<_, i64>(15)? as u64,
+        size_bytes: Some(row.get::<_, i64>(16)? as u64),
+        modified_secs: row.get(17)?,
         is_favorite: is_favorite > 0,
         watch_progress_seconds: position.map(|value| value as u32),
         watch_duration_seconds: duration.map(|value| value as u32),

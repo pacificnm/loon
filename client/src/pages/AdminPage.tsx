@@ -86,7 +86,11 @@ export function AdminPage() {
       const controller = new AbortController();
       abortRef.current = controller;
       setStreaming(true);
-      appendLog(full ? '--- Starting full metadata scan ---' : '--- Starting library scan ---');
+      appendLog(
+        full
+          ? '--- Starting metadata refresh (keeps manual TMDB matches) ---'
+          : '--- Starting library scan ---',
+      );
 
       try {
         await streamLibraryScan(
@@ -170,7 +174,7 @@ export function AdminPage() {
               />
               <FocusButton
                 focusKey="admin-scan-full"
-                label="Full metadata scan"
+                label="Refresh metadata"
                 onPress={() => void runScan(true)}
               />
               <FocusButton
@@ -194,8 +198,9 @@ export function AdminPage() {
             <div ref={logRef} className={adminStyles.log} aria-live="polite">
               {logLines.length === 0 ? (
                 <p className={adminStyles.logEmpty}>
-                  Scan output will appear here. Use Scan library for an incremental rescan, or
-                  Full metadata scan to re-fetch TMDB data for every movie.
+                  Scan output will appear here. Scan library finds new or changed files.
+                  Refresh metadata re-fetches TMDB for unlocked movies using their stored id
+                  (manual Edit matches are never overwritten).
                 </p>
               ) : (
                 logLines.map((line, index) => (

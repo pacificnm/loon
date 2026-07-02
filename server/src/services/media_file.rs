@@ -71,6 +71,7 @@ mod tests {
             crew: Vec::<CrewMemberDto>::new(),
             tmdb_id: Some("348".into()),
             imdb_id: Some("tt0078748".into()),
+            tmdb_locked: false,
             scanned_at: 1_700_000_000,
             size_bytes: Some(4_589_934_592),
             modified_secs: Some(1_699_000_000),

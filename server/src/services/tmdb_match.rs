@@ -54,6 +54,7 @@ pub async fn rematch_movie_by_tmdb_id(
     }
 
     apply_tmdb_fetch(&mut record, tmdb_id, &fetch.metadata, artwork.as_ref());
+    record.tmdb_locked = true;
 
     let size_bytes = stored
         .as_ref()

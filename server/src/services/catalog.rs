@@ -47,6 +47,8 @@ pub struct LoonMovieRecord {
     pub tmdb_id: Option<String>,
     /// IMDb id when known.
     pub imdb_id: Option<String>,
+    /// When true, library scans must not replace TMDB metadata (manual rematch).
+    pub tmdb_locked: bool,
     /// Unix timestamp when this file was last scanned.
     pub scanned_at: u64,
     /// File size in bytes when known.
@@ -246,6 +248,7 @@ fn record_from_candidate(
         crew: Vec::new(),
         tmdb_id: None,
         imdb_id: None,
+        tmdb_locked: false,
         scanned_at: 0,
         size_bytes: Some(candidate.file.size_bytes),
         modified_secs: candidate.file.modified_secs,
@@ -283,6 +286,7 @@ fn record_from_metadata(
         crew: map_crew(&metadata.crew),
         tmdb_id: metadata.external_ids.tmdb_id.clone(),
         imdb_id: metadata.external_ids.imdb_id.clone(),
+        tmdb_locked: false,
         scanned_at: 0,
         size_bytes: Some(candidate.file.size_bytes),
         modified_secs: candidate.file.modified_secs,
