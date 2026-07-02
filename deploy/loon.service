@@ -1,0 +1,23 @@
+[Unit]
+Description=Loon media server
+Documentation=https://github.com/pacificnm/loon
+After=network-online.target local-fs.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=loon
+Group=loon
+EnvironmentFile=-/etc/loon/env
+ExecStart=/usr/local/bin/loon-server --config /etc/loon/config.toml
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/loon /var/log/loon
+ReadOnlyPaths=@MEDIA_ROOT@
+
+[Install]
+WantedBy=multi-user.target

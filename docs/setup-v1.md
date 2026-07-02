@@ -4,6 +4,36 @@
 
 Native install on a **Linux home server** — systemd only, **no Docker**. See [repo-v1.md](repo-v1.md) for building the binary.
 
+## Quick install (systemd)
+
+From a clone of [pacificnm/loon](https://github.com/pacificnm/loon):
+
+```bash
+./scripts/install-service.sh --media-root /mnt/media
+```
+
+This builds `loon-server --release`, creates the `loon` system user, installs
+`/etc/loon/config.toml` and `/etc/loon/env`, copies the binary to
+`/usr/local/bin/loon-server`, installs `deploy/loon.service`, and starts the
+service.
+
+Options:
+
+| Flag | Effect |
+|------|--------|
+| `--media-root PATH` | Set `media_root` in config and systemd `ReadOnlyPaths` (default `/mnt/media`) |
+| `--no-build` | Skip `cargo build --release` (binary must already exist) |
+| `--no-start` | Install files only; do not `enable` or `start` |
+
+After install, set `TMDB_API_KEY` in `/etc/loon/env` and restart:
+
+```bash
+sudo nano /etc/loon/env
+sudo systemctl restart loon
+```
+
+Manual steps below remain for reference or custom layouts.
+
 ## Prerequisites
 
 | Requirement | Notes |
@@ -94,6 +124,8 @@ sudo chown root:loon /etc/loon/env
 
 ## systemd unit
 
+Shipped in [`deploy/loon.service`](../deploy/loon.service). Installed by
+[`scripts/install-service.sh`](../scripts/install-service.sh), or manually at
 `/etc/systemd/system/loon.service`:
 
 ```ini

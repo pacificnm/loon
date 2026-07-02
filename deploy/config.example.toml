@@ -1,0 +1,33 @@
+# Loon production config — installed to /etc/loon/config.toml by install-service.sh
+# Edit media_root and library roots for your server before starting the service.
+
+[loon]
+bind = "0.0.0.0:3000"
+data_dir = "/var/lib/loon"
+media_root = "@MEDIA_ROOT@"
+
+[media-library]
+id = "main"
+roots = ["."]
+video_extensions = ["mp4", "mkv", "avi", "mov", "m4v"]
+
+[tmdb]
+api_key_env = "TMDB_API_KEY"
+language = "en-US"
+
+[transcode]
+ffprobe_path = "/usr/bin/ffprobe"
+
+[ai]
+enabled = true
+provider = "ollama"
+base_url = "http://127.0.0.1:11434"
+model = "smollm2:360m"
+min_confidence = 0.5
+
+[http]
+cors_origins = ["*"]
+
+[logging]
+level = "info"
+directory = "/var/log/loon"
