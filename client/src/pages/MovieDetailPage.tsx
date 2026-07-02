@@ -13,6 +13,7 @@ import type { MovieDetail, MovieSummary } from '../api/types';
 import { FocusButton } from '../components/FocusButton';
 import { HorizontalRow } from '../components/HorizontalRow';
 import { getServerUrl, resolveArtworkUrl } from '../config';
+import { FileDetailsSection } from './MovieFileDetails';
 import styles from './MovieDetailPage.module.css';
 
 export function MovieDetailPage() {
@@ -137,6 +138,8 @@ export function MovieDetailPage() {
               </div>
             </div>
           </section>
+
+          <FileDetailsSection detail={detail} />
 
           {detail.cast.length > 0 ? <CastRow cast={detail.cast} /> : null}
 

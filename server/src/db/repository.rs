@@ -142,6 +142,7 @@ impl LibraryRepository {
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
                         m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
                         (SELECT GROUP_CONCAT(mg.genre) FROM movie_genres mg WHERE mg.movie_id = m.id) AS genres
@@ -166,6 +167,7 @@ impl LibraryRepository {
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
                         m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
                         (SELECT GROUP_CONCAT(mg.genre) FROM movie_genres mg WHERE mg.movie_id = m.id) AS genres
@@ -190,6 +192,7 @@ impl LibraryRepository {
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
                         m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
                         (SELECT GROUP_CONCAT(mg.genre) FROM movie_genres mg WHERE mg.movie_id = m.id) AS genres
@@ -367,6 +370,7 @@ impl LibraryRepository {
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
                         m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
                         (SELECT GROUP_CONCAT(mg.genre) FROM movie_genres mg WHERE mg.movie_id = m.id) AS genres
@@ -382,6 +386,7 @@ impl LibraryRepository {
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
                         m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
                         (SELECT GROUP_CONCAT(mg.genre) FROM movie_genres mg WHERE mg.movie_id = m.id) AS genres
@@ -428,6 +433,7 @@ impl LibraryRepository {
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
                         m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
                         (SELECT GROUP_CONCAT(mg.genre) FROM movie_genres mg WHERE mg.movie_id = m.id) AS genres
@@ -470,6 +476,7 @@ impl LibraryRepository {
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
                         m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
                         (SELECT GROUP_CONCAT(mg.genre) FROM movie_genres mg WHERE mg.movie_id = m.id) AS genres
@@ -503,6 +510,7 @@ impl LibraryRepository {
                 "SELECT m.id, lf.relative_path, m.slug, m.title, m.original_title, m.year,
                         m.runtime_seconds, m.summary, m.poster_url, m.backdrop_url,
                         m.cast_json, m.crew_json, m.tmdb_id, m.imdb_id, lf.scanned_at,
+                        lf.size_bytes, lf.modified_secs,
                         EXISTS(SELECT 1 FROM favorites f WHERE f.movie_id = m.id) AS is_favorite,
                         wp.position_seconds, wp.duration_seconds,
                         (SELECT GROUP_CONCAT(mg.genre) FROM movie_genres mg WHERE mg.movie_id = m.id) AS genres
@@ -624,10 +632,10 @@ fn row_to_record(row: &rusqlite::Row<'_>) -> Result<LoonMovieRecord, rusqlite::E
     let cast: Vec<CastMemberDto> = serde_json::from_str(&cast_json).unwrap_or_default();
     let crew: Vec<CrewMemberDto> = serde_json::from_str(&crew_json).unwrap_or_default();
     let runtime_seconds: Option<i64> = row.get(6)?;
-    let is_favorite: i64 = row.get(15)?;
-    let position: Option<i64> = row.get(16)?;
-    let duration: Option<i64> = row.get(17)?;
-    let genres = parse_genres(row.get(18)?);
+    let is_favorite: i64 = row.get(17)?;
+    let position: Option<i64> = row.get(18)?;
+    let duration: Option<i64> = row.get(19)?;
+    let genres = parse_genres(row.get(20)?);
 
     Ok(LoonMovieRecord {
         media_id: row.get(0)?,
@@ -646,6 +654,8 @@ fn row_to_record(row: &rusqlite::Row<'_>) -> Result<LoonMovieRecord, rusqlite::E
         tmdb_id: row.get(12)?,
         imdb_id: row.get(13)?,
         scanned_at: row.get::<_, i64>(14)? as u64,
+        size_bytes: Some(row.get::<_, i64>(15)? as u64),
+        modified_secs: row.get(16)?,
         is_favorite: is_favorite > 0,
         watch_progress_seconds: position.map(|value| value as u32),
         watch_duration_seconds: duration.map(|value| value as u32),

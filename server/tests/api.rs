@@ -89,6 +89,10 @@ async fn movie_detail_by_slug() {
     assert_eq!(body["title"], "Alien");
     assert_eq!(body["year"], 1979);
     assert_eq!(body["stream_url"], "/stream/alien-1979");
+    assert_eq!(body["file"]["filename"], "Alien (1979).mp4");
+    assert_eq!(body["file"]["extension"], "mp4");
+    assert_eq!(body["file"]["content_type"], "video/mp4");
+    assert!(body["file"]["size_bytes"].as_u64().unwrap_or(0) > 0);
 
     server.shutdown().await;
 }

@@ -86,6 +86,35 @@
   margin-bottom: 28px;
 }
 
+.detailsSection {
+  margin-bottom: 28px;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) 1fr;
+  gap: 10px 24px;
+  margin: 0;
+  max-width: 1100px;
+}
+
+.detailItem {
+  display: contents;
+}
+
+.detailLabel {
+  margin: 0;
+  font-size: 20px;
+  color: var(--muted);
+}
+
+.detailValue {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
 .castRow {
   display: flex;
   gap: 12px;

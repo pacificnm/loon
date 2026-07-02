@@ -11,6 +11,7 @@ pub use library::{
     ProgressRequest, ProgressResponse, ScanStartRequest, SearchResponse,
 };
 pub use movie::{
-    CastMemberDto, CrewMemberDto, HealthResponse, MovieDetail, MovieListResponse, MovieSummary,
+    CastMemberDto, CrewMemberDto, HealthResponse, MovieDetail, MovieFileInfo, MovieListResponse,
+    MovieSummary,
 };
 pub use root::RootResponse;

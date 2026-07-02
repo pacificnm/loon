@@ -26,6 +26,16 @@ export interface CrewMember {
   job?: string;
 }
 
+export interface MovieFileInfo {
+  filename: string;
+  relative_path: string;
+  extension?: string | null;
+  size_bytes?: number | null;
+  content_type: string;
+  modified_at?: number | null;
+  scanned_at?: number | null;
+}
+
 export interface MovieDetail {
   slug: string;
   title: string;
@@ -40,6 +50,9 @@ export interface MovieDetail {
   crew: CrewMember[];
   is_favorite: boolean;
   watch_progress_seconds?: number;
+  tmdb_id?: string | null;
+  imdb_id?: string | null;
+  file: MovieFileInfo;
   stream_url: string;
 }
 

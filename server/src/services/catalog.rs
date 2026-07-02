@@ -10,6 +10,7 @@ use tracing::warn;
 use crate::models::{CastMemberDto, CrewMemberDto, MovieDetail, MovieSummary};
 use crate::services::artwork::{ArtworkKind, ArtworkRuntime};
 use crate::services::enrichment::ScanArtworkMap;
+use crate::services::media_file::file_info_from_record;
 use crate::services::slug::unique_movie_slug;
 
 /// One playable movie in Loon's catalog.
@@ -47,6 +48,10 @@ pub struct LoonMovieRecord {
     pub imdb_id: Option<String>,
     /// Unix timestamp when this file was last scanned.
     pub scanned_at: u64,
+    /// File size in bytes when known.
+    pub size_bytes: Option<u64>,
+    /// Last modification time when known.
+    pub modified_secs: Option<u64>,
     /// Whether the user marked this movie as a favorite.
     pub is_favorite: bool,
     /// Last known watch position in seconds.
@@ -143,6 +148,9 @@ impl LoonMovieRecord {
             crew: self.crew.clone(),
             is_favorite: self.is_favorite,
             watch_progress_seconds: self.watch_progress_seconds,
+            tmdb_id: self.tmdb_id.clone(),
+            imdb_id: self.imdb_id.clone(),
+            file: file_info_from_record(self),
             stream_url: format!("/stream/{}", self.slug),
         }
     }
@@ -213,6 +221,8 @@ fn record_from_candidate(
         tmdb_id: None,
         imdb_id: None,
         scanned_at: 0,
+        size_bytes: Some(candidate.file.size_bytes),
+        modified_secs: candidate.file.modified_secs,
         is_favorite: false,
         watch_progress_seconds: None,
         watch_duration_seconds: None,
@@ -248,6 +258,8 @@ fn record_from_metadata(
         tmdb_id: metadata.external_ids.tmdb_id.clone(),
         imdb_id: metadata.external_ids.imdb_id.clone(),
         scanned_at: 0,
+        size_bytes: Some(candidate.file.size_bytes),
+        modified_secs: candidate.file.modified_secs,
         is_favorite: false,
         watch_progress_seconds: None,
         watch_duration_seconds: None,

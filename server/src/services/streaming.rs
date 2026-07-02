@@ -8,6 +8,7 @@ use tokio::fs::File;
 use tokio::io::{AsyncReadExt, AsyncSeekExt};
 
 use crate::error::movie_not_found;
+use crate::services::media_file::content_type_for_path;
 use crate::state;
 
 /// `GET /stream/:slug`
@@ -35,11 +36,11 @@ pub async fn stream_movie(ctx: RequestContext) -> HttpResult {
 
     let total = metadata.len();
     if total == 0 {
-        return Ok(empty_video_response(content_type_for_path(&file_path)));
+        return Ok(empty_video_response(content_type_for_path(&relative_path)));
     }
 
     let range_header = ctx.header("range");
-    let content_type = content_type_for_path(&file_path);
+    let content_type = content_type_for_path(&relative_path);
 
     match parse_range(range_header, total) {
         RangeParseResult::Full => stream_full_file(&file_path, total, content_type, slug).await,
@@ -185,21 +186,6 @@ fn resolve_media_path(
     }
 
     Ok(canonical)
-}
-
-fn content_type_for_path(path: &Path) -> &'static str {
-    match path
-        .extension()
-        .and_then(|ext| ext.to_str())
-        .map(str::to_ascii_lowercase)
-        .as_deref()
-    {
-        Some("mp4") | Some("m4v") | Some("mov") => "video/mp4",
-        Some("mkv") => "video/x-matroska",
-        Some("webm") => "video/webm",
-        Some("avi") => "video/x-msvideo",
-        _ => "application/octet-stream",
-    }
 }
 
 #[cfg(test)]

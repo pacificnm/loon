@@ -83,8 +83,33 @@ pub struct MovieDetail {
     pub is_favorite: bool,
     /// Last known watch position in seconds.
     pub watch_progress_seconds: Option<u32>,
+    /// TMDB movie id when known.
+    pub tmdb_id: Option<String>,
+    /// IMDb id when known.
+    pub imdb_id: Option<String>,
+    /// On-disk media file metadata.
+    pub file: MovieFileInfo,
     /// Relative stream URL for playback.
     pub stream_url: String,
+}
+
+/// Media file metadata for a catalog movie.
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+pub struct MovieFileInfo {
+    /// Base file name.
+    pub filename: String,
+    /// Path relative to the library root.
+    pub relative_path: String,
+    /// File extension without the dot.
+    pub extension: Option<String>,
+    /// File size in bytes when known.
+    pub size_bytes: Option<u64>,
+    /// HTTP content type for streaming.
+    pub content_type: String,
+    /// Last modification time as unix seconds.
+    pub modified_at: Option<u64>,
+    /// Last library scan time as unix seconds.
+    pub scanned_at: Option<u64>,
 }
 
 /// Cast member in a movie detail response.
