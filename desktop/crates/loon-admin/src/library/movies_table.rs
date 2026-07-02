@@ -71,7 +71,6 @@ impl MoviesTable {
                         body.rows(ROW_HEIGHT, movies.len(), |mut row| {
                             let index = row.index();
                             let movie = &movies[index];
-                            let row_response = row.response();
 
                             row.col(|ui| {
                                 self.poster_cell(ui, movie);
@@ -90,7 +89,7 @@ impl MoviesTable {
                                 ui.label(summary);
                             });
 
-                            if row_response.clicked() {
+                            if row.response().clicked() {
                                 selected = Some(movie.slug.clone());
                             }
                         });
