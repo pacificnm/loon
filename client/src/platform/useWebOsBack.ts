@@ -1,16 +1,9 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-
-const WEBOS_BACK_KEYCODE = 461;
-
-function isBackKey(event: KeyboardEvent): boolean {
-  return (
-    event.keyCode === WEBOS_BACK_KEYCODE ||
-    event.key === 'Backspace' ||
-    event.key === 'GoBack' ||
-    event.key === 'BrowserBack'
-  );
-}
+import {
+  isAppBackKey,
+  shouldDeferToTextInput,
+} from './keyboard';
 
 /** Handle LG Magic Remote Back with disableBackHistoryAPI: true. */
 export function useWebOsBack(): void {
@@ -19,7 +12,10 @@ export function useWebOsBack(): void {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!isBackKey(event)) {
+      if (shouldDeferToTextInput(event)) {
+        return;
+      }
+      if (!isAppBackKey(event)) {
         return;
       }
       // Player route has its own back handler.

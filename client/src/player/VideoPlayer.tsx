@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { isAppBackKey } from '../platform/keyboard';
 import { useWebOsVisibility } from '../platform/useWebOsLifecycle';
 import styles from './VideoPlayer.module.css';
 
@@ -7,9 +8,6 @@ interface VideoPlayerProps {
   title: string;
   onBack: () => void;
 }
-
-const BACK_KEY = 'Backspace';
-const WEBOS_BACK_KEYCODE = 461;
 
 export function VideoPlayer({ src, title, onBack }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -27,10 +25,11 @@ export function VideoPlayer({ src, title, onBack }: VideoPlayerProps) {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === BACK_KEY || event.keyCode === WEBOS_BACK_KEYCODE) {
-        event.preventDefault();
-        onBack();
+      if (!isAppBackKey(event)) {
+        return;
       }
+      event.preventDefault();
+      onBack();
     };
     window.addEventListener('keydown', onKeyDown, true);
     return () => window.removeEventListener('keydown', onKeyDown, true);
