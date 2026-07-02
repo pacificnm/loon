@@ -1,0 +1,26 @@
+---
+description: Mandatory webos-tv knowledge lookup for Loon webOS client work
+globs: client/**
+alwaysApply: false
+---
+
+# webOS TV knowledge (mandatory)
+
+When working under `client/`, use MCP **`search_knowledge_base`** with
+`collection="webos-tv"` before implementing or changing webOS-specific behavior.
+
+## Required
+
+1. Nest memory workflow if the nest checkout is available (project + context memory).
+2. **`search_knowledge_base(query="...", collection="webos-tv")`** — platform APIs,
+   `appinfo.json`, events, Developer Mode, packaging.
+
+Hooks in the nest repo enforce this when paths include `client/`.
+
+## Index refresh (nest repo)
+
+```bash
+cd /path/to/nest && ./scripts/fetch-webos-knowledge.sh
+```
+
+Docs: [docs/webos-knowledge-v1.md](../docs/webos-knowledge-v1.md)
