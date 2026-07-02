@@ -20,28 +20,35 @@ interface FocusableCardProps {
 }
 
 function FocusableCard({ prefix, movie, posterUrl, rowRef, onSelect }: FocusableCardProps) {
+  const select = () => onSelect(movie);
+
   const { ref, focused } = useFocusable({
     focusKey: cardFocusKey(prefix, movie.slug),
-    onEnterPress: () => onSelect(movie),
+    onEnterPress: select,
     onFocus: (layout) => {
       const row = rowRef.current;
       if (!row) {
         return;
       }
+      const rowRect = row.getBoundingClientRect();
       const itemLeft = layout.x;
       const itemRight = layout.x + layout.width;
-      const viewLeft = row.scrollLeft;
-      const viewRight = viewLeft + row.clientWidth;
-      if (itemLeft < viewLeft) {
-        row.scrollLeft = itemLeft - 48;
-      } else if (itemRight > viewRight) {
-        row.scrollLeft = itemRight - row.clientWidth + 48;
+      if (itemLeft < rowRect.left + 8) {
+        row.scrollLeft -= rowRect.left - itemLeft + 48;
+      } else if (itemRight > rowRect.right - 8) {
+        row.scrollLeft += itemRight - rowRect.right + 48;
       }
     },
   });
 
   return (
-    <div ref={ref} className={styles.item}>
+    <div
+      ref={ref}
+      className={styles.item}
+      role="button"
+      tabIndex={-1}
+      onClick={select}
+    >
       <PosterCard movie={movie} posterUrl={posterUrl} focused={focused} />
     </div>
   );

@@ -35,6 +35,10 @@ export function MovieDetailPage() {
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setDetail(null);
+    setSimilar([]);
+    ref.current?.scrollTo(0, 0);
+
     try {
       const movie = await fetchMovie(server, slug);
       setDetail(movie);
@@ -142,7 +146,11 @@ export function MovieDetailPage() {
               prefix="similar"
               movies={similar}
               resolveArtwork={resolveArtwork}
-              onSelect={(movie) => navigate(`/movie/${movie.slug}`)}
+              onSelect={(movie) => {
+                if (movie.slug !== slug) {
+                  navigate(`/movie/${movie.slug}`);
+                }
+              }}
             />
           ) : null}
         </div>
