@@ -1,0 +1,17 @@
+[patch."https://github.com/pacificnm/nest"]
+nest-http-serve = { path = "../../core/crates/nest-http-serve" }
+nest-config = { path = "../../core/crates/nest-config" }
+nest-error = { path = "../../core/crates/nest-error" }
+nest-file = { path = "../../core/crates/nest-file" }
+nest-media-library = { path = "../../modules/crates/nest-media-library" }
+nest-tmdb = { path = "../../modules/crates/nest-tmdb" }
+nest-http-client = { path = "../../core/crates/nest-http-client" }
+nest-http = { path = "../../core/crates/nest-http" }
+nest-media = { path = "../../core/crates/nest-media" }
+nest-data = { path = "../../core/crates/nest-data" }
+nest-data-sqlite = { path = "../../modules/crates/nest-data-sqlite" }
+nest-ai = { path = "../../core/crates/nest-ai" }
+nest-ai-ollama = { path = "../../modules/crates/nest-ai-ollama" }
+nest-logging = { path = "../../core/crates/nest-logging" }
+nest-cache = { path = "../../core/crates/nest-cache" }
+nest-cache-file = { path = "../../modules/crates/nest-cache-file" }

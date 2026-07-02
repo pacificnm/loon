@@ -1,0 +1,33 @@
+[workspace]
+resolver = "2"
+members = ["server"]
+
+[workspace.package]
+edition = "2021"
+rust-version = "1.75"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/pacificnm/loon"
+
+[workspace.dependencies]
+nest-http-serve = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-config = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-error = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-file = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-media-library = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-tmdb = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-ai = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-ai-ollama = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-http-client = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-http = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-media = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-data = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-data-sqlite = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-logging = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-cache = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-cache-file = { git = "https://github.com/pacificnm/nest", branch = "main" }
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+clap = { version = "4", features = ["derive"] }

@@ -1,0 +1,42 @@
+# Loon server configuration — copy to config.toml and adjust.
+# See docs/v1.md for full reference.
+
+[loon]
+bind = "0.0.0.0:3000"
+# Local dev: ./data under the app directory. Production/systemd: /var/lib/loon
+data_dir = "data"
+# Absolute path to your media library root on disk.
+# Subfolders listed in [media-library].roots are scanned beneath this path.
+media_root = "/mnt/media"
+
+[media-library]
+id = "main"
+# Directories under media_root to scan. Use ["."] when movies live directly in media_root.
+roots = ["."]
+video_extensions = ["mp4", "mkv", "avi", "mov", "m4v"]
+
+[tmdb]
+# Option A: key in this file (gitignored config.toml only — never commit)
+# api_key = "your-tmdb-key"
+# Option B: read from environment
+api_key_env = "TMDB_API_KEY"
+language = "en-US"
+# region = "US"
+
+[transcode]
+ffprobe_path = "ffprobe"
+
+[ai]
+enabled = true
+provider = "ollama"
+base_url = "http://127.0.0.1:11434"
+model = "smollm2:360m"
+min_confidence = 0.5
+
+[http]
+# webOS dev: use your LAN origin or "*" for local testing only
+cors_origins = ["*"]
+
+[logging]
+level = "info"
+directory = "./logs"

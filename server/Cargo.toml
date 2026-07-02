@@ -1,0 +1,44 @@
+[package]
+name = "loon-server"
+version = "0.1.0"
+edition = "2021"
+description = "Loon movie server for LG webOS"
+
+[lib]
+name = "loon_server"
+path = "src/lib.rs"
+
+[[bin]]
+name = "loon-server"
+path = "src/main.rs"
+
+[dependencies]
+nest-http-serve = { workspace = true }
+nest-config = { workspace = true }
+nest-error = { workspace = true }
+nest-file = { workspace = true }
+nest-media-library = { workspace = true }
+nest-tmdb = { workspace = true }
+nest-ai = { workspace = true }
+nest-ai-ollama = { workspace = true }
+nest-http-client = { workspace = true }
+nest-http = { workspace = true }
+nest-media = { workspace = true }
+nest-data = { workspace = true }
+nest-data-sqlite = { workspace = true }
+nest-cache = { workspace = true }
+nest-cache-file = { workspace = true }
+nest-logging = { workspace = true }
+rusqlite = { version = "0.32", features = ["bundled"] }
+tempfile = "3"
+serde = { workspace = true }
+serde_json = { workspace = true }
+bytes = "1"
+tokio = { workspace = true, features = ["fs", "io-util"] }
+tokio-stream = "0.1"
+tracing = { workspace = true }
+clap = { workspace = true }
+
+[dev-dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+wiremock = "0.6"

@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_ROOT="$(cd "$(dirname "$0")" && pwd)"
+export CARGO_TARGET_DIR="$APP_ROOT/target"
+export RUSTFLAGS="${RUSTFLAGS:--D warnings}"
+
+cd "$APP_ROOT"
+
+cmd="${1:-build}"
+shift || true
+
+case "$cmd" in
+  build)
+    cargo build -p loon-server "$@"
+    ;;
+  release)
+    cargo build -p loon-server --release "$@"
+    ;;
+  run)
+    profile=debug
+    if [[ "${1:-}" == "--release" ]]; then
+      profile=release
+      shift
+    fi
+    bin="$APP_ROOT/target/$profile/loon-server"
+    if [[ ! -x "$bin" ]]; then
+      if [[ "$profile" == release ]]; then
+        cargo build -p loon-server --release
+      else
+        cargo build -p loon-server
+      fi
+    fi
+    config_args=()
+    if [[ -f "$APP_ROOT/config.toml" ]]; then
+      config_args=(--config "$APP_ROOT/config.toml")
+    fi
+    if [[ "${1:-}" == "--" ]]; then
+      shift
+    fi
+    exec "$bin" "${config_args[@]}" "$@"
+    ;;
+  test)
+    cargo test -p loon-server -- --test-threads=1 "$@"
+    ;;
+  clippy)
+    cargo clippy -p loon-server -- -D warnings "$@"
+    ;;
+  fmt)
+    cargo fmt --all "$@"
+    ;;
+  check)
+    cargo fmt --all -- --check
+    cargo clippy -p loon-server -- -D warnings
+    cargo test -p loon-server -- --test-threads=1
+    cargo build -p loon-server --release
+    ;;
+  *)
+    cargo "$cmd" -p loon-server "$@"
+    ;;
+esac

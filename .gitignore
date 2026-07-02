@@ -1,0 +1,13 @@
+# Local configuration (media paths, bind address, TMDB keys)
+/config.toml
+.env
+/data/
+/logs/
+
+/target/
+/server/target/
+*.db
+*.db-journal
+/webos/node_modules/
+/webos/dist/
+.DS_Store
