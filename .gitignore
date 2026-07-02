@@ -13,4 +13,7 @@
 /client/package/
 /client/build/
 /client/.env.local
+/desktop/config.toml
 .DS_Store
+
+/desktop/target/

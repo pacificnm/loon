@@ -55,6 +55,9 @@ case "$cmd" in
     cargo test -p loon-server -- --test-threads=1
     cargo build -p loon-server --release
     ;;
+  desktop)
+    exec "$APP_ROOT/desktop/build" "$@"
+    ;;
   *)
     cargo "$cmd" -p loon-server "$@"
     ;;

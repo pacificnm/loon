@@ -1,0 +1,14 @@
+# Loon Admin desktop — copy to config.toml and adjust.
+
+[gui]
+title = "Loon Admin"
+width = 1280
+height = 800
+vsync = true
+
+[loon-admin]
+server_url = "http://127.0.0.1:3000"
+
+[logging]
+level = "info"
+directory = "./logs"

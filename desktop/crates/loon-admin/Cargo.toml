@@ -1,0 +1,22 @@
+[package]
+name = "loon-admin"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Loon desktop admin GUI (nest-gui host)"
+
+[[bin]]
+name = "loon-admin"
+path = "src/main.rs"
+
+[dependencies]
+egui = { workspace = true }
+loon-egui-theme = { path = "../loon-egui-theme" }
+nest-core = { workspace = true }
+nest-design = { workspace = true }
+nest-error = { workspace = true }
+nest-gui = { workspace = true }
+nest-theme = { workspace = true }
+tracing = { workspace = true }

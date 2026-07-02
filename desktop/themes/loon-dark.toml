@@ -1,0 +1,44 @@
+id = "loon-dark"
+mode = "dark"
+
+[colors]
+background = "#090B10"
+foreground = "#E2E8F0"
+primary = "#7DD3FC"
+secondary = "#64748B"
+border = "#1E293B"
+surface = "#111827"
+accent = "#38BDF8"
+muted = "#94A3B8"
+
+[spacing]
+xs = 4.0
+sm = 8.0
+md = 16.0
+lg = 24.0
+xl = 32.0
+xxl = 48.0
+
+[radius]
+sm = 4.0
+md = 8.0
+lg = 12.0
+full = 9999.0
+
+[typography.body]
+font_family = "Inter"
+size = 14.0
+line_height = 20.0
+weight = 400
+
+[typography.heading]
+font_family = "Inter"
+size = 20.0
+line_height = 28.0
+weight = 600
+
+[status]
+success = "#22C55E"
+warning = "#F59E0B"
+error = "#EF4444"
+info = "#38BDF8"
