@@ -37,6 +37,27 @@ ares-launch -s 26 ~/loon-package
 
 Set `WEBOS_SIM_VERSION=26` or `WEBOS_SIM_PATH=/path/to/simulator` if needed.
 
+**Ubuntu 24+ / remote desktop:** `ares-launch` cannot pass Chromium flags. Export your AppImage path, then use the wrapper (default on Linux):
+
+```bash
+export WEBOS_SIM_APPIMAGE=~/webOS_TV_26_Simulator_1.5.0.AppImage
+npm run launch:simulator    # uses scripts/webos-simulator.sh via ares-launch -sp
+```
+
+Or start the simulator first, then load the app from **File → Launch App → `package/`**:
+
+```bash
+npm run start:simulator     # AppImage --ozone-platform=x11 --no-sandbox
+npm run package:webos
+# Simulator UI: File → Launch App → select package/
+```
+
+Manual AppImage launch:
+
+```bash
+./webOS_TV_26_Simulator_1.5.0.AppImage --ozone-platform=x11 --no-sandbox
+```
+
 ### TV / legacy emulator (IPK)
 
 ```bash

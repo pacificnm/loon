@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "package:webos": "npm run build && node scripts/prepare-webos-package.mjs",
+    "start:simulator": "node scripts/start-simulator.mjs",
     "launch:simulator": "npm run package:webos && node scripts/launch-simulator.mjs"
   },
   "dependencies": {
