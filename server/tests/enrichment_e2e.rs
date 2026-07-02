@@ -106,6 +106,10 @@ async fn scan_enriches_narnia_via_ai_then_tmdb() {
         .iter()
         .any(|genre| genre == "Fantasy"));
     assert_eq!(detail["cast"][0]["name"], "Georgie Henley");
+    assert!(detail["cast"][0]["profile_url"]
+        .as_str()
+        .unwrap()
+        .contains("georgie.jpg"));
 
     server.shutdown().await;
 }
@@ -172,7 +176,8 @@ async fn mount_tmdb_narnia_mocks(tmdb: &MockServer) {
             "cast": [{
                 "name": "Georgie Henley",
                 "character": "Lucy Pevensie",
-                "order": 0
+                "order": 0,
+                "profile_path": "/georgie.jpg"
             }],
             "crew": [{
                 "name": "Andrew Adamson",

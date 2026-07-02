@@ -19,6 +19,7 @@ export interface MovieListResponse {
 export interface CastMember {
   name: string;
   character?: string;
+  profile_url?: string;
 }
 
 export interface CrewMember {

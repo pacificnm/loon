@@ -49,13 +49,6 @@ function buildDetailRows(detail: MovieDetail): DetailRow[] {
     rows.push({ label: 'IMDb', value: detail.imdb_id });
   }
 
-  const directors = (detail.crew ?? [])
-    .filter((member) => member.job?.toLowerCase() === 'director')
-    .map((member) => member.name);
-  if (directors.length > 0) {
-    rows.push({ label: 'Director', value: directors.join(', ') });
-  }
-
   if (detail.watch_progress_seconds != null && detail.watch_progress_seconds > 0) {
     rows.push({
       label: 'Watch progress',
@@ -66,23 +59,76 @@ function buildDetailRows(detail: MovieDetail): DetailRow[] {
   return rows;
 }
 
+function splitIntoColumns<T>(items: T[], columns: number): T[][] {
+  if (items.length === 0) {
+    return [];
+  }
+  const perColumn = Math.ceil(items.length / columns);
+  return Array.from({ length: columns }, (_, index) =>
+    items.slice(index * perColumn, (index + 1) * perColumn),
+  ).filter((column) => column.length > 0);
+}
+
 export function FileDetailsSection({ detail }: { detail: MovieDetail }) {
   const rows = buildDetailRows(detail);
   if (rows.length === 0) {
     return null;
   }
 
+  const columns = splitIntoColumns(rows, 3);
+
   return (
     <section className={styles.detailsSection}>
       <h2 className={styles.sectionTitle}>File &amp; media info</h2>
-      <dl className={styles.detailsGrid}>
-        {rows.map((row) => (
-          <div key={row.label} className={styles.detailItem}>
-            <dt className={styles.detailLabel}>{row.label}</dt>
-            <dd className={styles.detailValue}>{row.value}</dd>
-          </div>
+      <div className={styles.detailsColumns}>
+        {columns.map((column, columnIndex) => (
+          <dl key={columnIndex} className={styles.detailsColumn}>
+            {column.map((row) => (
+              <div key={row.label} className={styles.detailItem}>
+                <dt className={styles.detailLabel}>{row.label}</dt>
+                <dd className={styles.detailValue}>{row.value}</dd>
+              </div>
+            ))}
+          </dl>
         ))}
-      </dl>
+      </div>
     </section>
+  );
+}
+
+interface CrewCreditsProps {
+  crew: MovieDetail['crew'];
+}
+
+export function CrewCreditsSection({ crew }: CrewCreditsProps) {
+  const directors = crew
+    .filter((member) => member.job?.toLowerCase() === 'director')
+    .map((member) => member.name);
+  const producers = crew
+    .filter((member) => {
+      const job = member.job?.toLowerCase() ?? '';
+      return job === 'producer' || job === 'executive producer';
+    })
+    .map((member) => member.name);
+
+  if (directors.length === 0 && producers.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={styles.crewCredits}>
+      {directors.length > 0 ? (
+        <p className={styles.crewLine}>
+          <span className={styles.crewLabel}>Director</span>
+          {directors.join(', ')}
+        </p>
+      ) : null}
+      {producers.length > 0 ? (
+        <p className={styles.crewLine}>
+          <span className={styles.crewLabel}>Producers</span>
+          {producers.join(', ')}
+        </p>
+      ) : null}
+    </div>
   );
 }

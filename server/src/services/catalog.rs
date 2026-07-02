@@ -5,6 +5,7 @@ use std::path::Path;
 
 use nest_media::{MovieMetadata, PersonCredit};
 use nest_media_library::{MovieScanCandidate, ScanResult};
+use nest_tmdb::{ImageSize, TmdbImageService, DEFAULT_IMAGE_BASE_URL};
 use tracing::warn;
 
 use crate::models::{CastMemberDto, CrewMemberDto, MovieDetail, MovieSummary};
@@ -297,6 +298,13 @@ fn map_cast(credits: &[PersonCredit]) -> Vec<CastMemberDto> {
         .map(|credit| CastMemberDto {
             name: credit.name.clone(),
             character: credit.character.clone(),
+            profile_url: credit.profile_path.as_ref().map(|path| {
+                TmdbImageService::profile_url_with_base(
+                    DEFAULT_IMAGE_BASE_URL,
+                    path,
+                    ImageSize::W185,
+                )
+            }),
         })
         .collect()
 }

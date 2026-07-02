@@ -119,6 +119,9 @@ pub struct CastMemberDto {
     pub name: String,
     /// Character name.
     pub character: Option<String>,
+    /// Profile image URL when known.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub profile_url: Option<String>,
 }
 
 /// Crew member in a movie detail response.

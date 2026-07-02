@@ -13,7 +13,7 @@ import type { MovieDetail, MovieSummary } from '../api/types';
 import { FocusButton } from '../components/FocusButton';
 import { HorizontalRow } from '../components/HorizontalRow';
 import { getServerUrl, resolveArtworkUrl } from '../config';
-import { FileDetailsSection } from './MovieFileDetails';
+import { CrewCreditsSection, FileDetailsSection } from './MovieFileDetails';
 import styles from './MovieDetailPage.module.css';
 
 interface MovieDetailPageProps {
@@ -126,60 +126,79 @@ export function MovieDetailPage({
   }
 
   const posterUrl = resolveArtwork(detail.poster_url);
+  const backdropUrl = resolveArtwork(detail.backdrop_url);
   const runtime =
     detail.runtime_minutes && detail.runtime_minutes > 0
       ? `${Math.floor(detail.runtime_minutes / 60)}h ${detail.runtime_minutes % 60}m`
       : null;
+  const hasOverview = Boolean(detail.summary) || (detail.crew?.length ?? 0) > 0;
 
   return (
     <div className={styles.page}>
       <FocusContext.Provider value={focusKey}>
         <div ref={ref} className={styles.scroll}>
-          <section className={styles.hero}>
-            <div className={styles.posterFrame}>
-              {posterUrl ? (
-                <img
-                  key={posterUrl}
-                  className={styles.poster}
-                  src={posterUrl}
-                  alt=""
-                />
-              ) : (
-                <div className={styles.posterPlaceholder}>{detail.title.slice(0, 1)}</div>
-              )}
-            </div>
-            <div className={styles.info}>
-              <h1 className={styles.title}>{detail.title}</h1>
-              {detail.original_title && detail.original_title !== detail.title ? (
-                <p className={styles.original}>{detail.original_title}</p>
-              ) : null}
-              <p className={styles.meta}>
-                {[detail.year, runtime, (detail.genres ?? []).join(' · ')].filter(Boolean).join(' · ')}
-              </p>
-              {detail.summary ? <p className={styles.summary}>{detail.summary}</p> : null}
-              <div className={styles.actions}>
-                <FocusButton
-                  focusKey="detail-play"
-                  label="Play"
-                  onPress={() => navigate(`/play/${detail.slug}`)}
-                />
-                <FocusButton
-                  focusKey="detail-favorite"
-                  label={detail.is_favorite ? 'Remove Favorite' : 'Favorite'}
-                  onPress={() => void toggleFavorite()}
-                />
-                <FocusButton
-                  focusKey="detail-edit"
-                  label="Edit"
-                  onPress={() => navigate(`/movie/${detail.slug}/edit`)}
-                />
+          <section className={styles.backdropHero}>
+            {backdropUrl ? (
+              <img key={backdropUrl} className={styles.backdrop} src={backdropUrl} alt="" />
+            ) : (
+              <div className={styles.backdropFallback} />
+            )}
+            <div className={styles.backdropScrim} />
+            <div className={styles.heroContent}>
+              <div className={styles.posterFrame}>
+                {posterUrl ? (
+                  <img
+                    key={posterUrl}
+                    className={styles.poster}
+                    src={posterUrl}
+                    alt=""
+                  />
+                ) : (
+                  <div className={styles.posterPlaceholder}>{detail.title.slice(0, 1)}</div>
+                )}
+              </div>
+              <div className={styles.info}>
+                <h1 className={styles.title}>{detail.title}</h1>
+                {detail.original_title && detail.original_title !== detail.title ? (
+                  <p className={styles.original}>{detail.original_title}</p>
+                ) : null}
+                <p className={styles.meta}>
+                  {[detail.year, runtime, (detail.genres ?? []).join(' · ')].filter(Boolean).join(' · ')}
+                </p>
+                <div className={styles.actions}>
+                  <FocusButton
+                    focusKey="detail-play"
+                    label="Play"
+                    onPress={() => navigate(`/play/${detail.slug}`)}
+                  />
+                  <FocusButton
+                    focusKey="detail-favorite"
+                    label={detail.is_favorite ? 'Remove Favorite' : 'Favorite'}
+                    onPress={() => void toggleFavorite()}
+                  />
+                  <FocusButton
+                    focusKey="detail-edit"
+                    label="Edit"
+                    onPress={() => navigate(`/movie/${detail.slug}/edit`)}
+                  />
+                </div>
               </div>
             </div>
           </section>
 
+          {hasOverview ? (
+            <section className={styles.overviewSection}>
+              <h2 className={styles.sectionTitle}>Overview</h2>
+              {detail.summary ? <p className={styles.summary}>{detail.summary}</p> : null}
+              <CrewCreditsSection crew={detail.crew ?? []} />
+            </section>
+          ) : null}
+
           <FileDetailsSection detail={detail} />
 
-          {detail.cast && detail.cast.length > 0 ? <CastRow cast={detail.cast} /> : null}
+          {detail.cast && detail.cast.length > 0 ? (
+            <CastRow cast={detail.cast} resolveArtwork={resolveArtwork} />
+          ) : null}
 
           {similar.length > 0 ? (
             <HorizontalRow
@@ -200,7 +219,13 @@ export function MovieDetailPage({
   );
 }
 
-function CastRow({ cast }: { cast: MovieDetail['cast'] }) {
+function CastRow({
+  cast,
+  resolveArtwork,
+}: {
+  cast: MovieDetail['cast'];
+  resolveArtwork: (path: string | undefined) => string | undefined;
+}) {
   const { ref, focusKey } = useFocusable({
     focusable: false,
     trackChildren: true,
@@ -210,11 +235,16 @@ function CastRow({ cast }: { cast: MovieDetail['cast'] }) {
 
   return (
     <section className={styles.castSection}>
-      <h2 className={styles.sectionTitle}>Cast</h2>
+      <h2 className={styles.sectionTitle}>Top Billed Cast</h2>
       <FocusContext.Provider value={focusKey}>
         <div ref={ref} className={styles.castRow}>
           {cast.map((member, index) => (
-            <CastChip key={`${member.name}-${index}`} member={member} index={index} />
+            <CastCard
+              key={`${member.name}-${index}`}
+              member={member}
+              index={index}
+              resolveArtwork={resolveArtwork}
+            />
           ))}
         </div>
       </FocusContext.Provider>
@@ -222,23 +252,35 @@ function CastRow({ cast }: { cast: MovieDetail['cast'] }) {
   );
 }
 
-function CastChip({
+function CastCard({
   member,
   index,
+  resolveArtwork,
 }: {
   member: MovieDetail['cast'][number];
   index: number;
+  resolveArtwork: (path: string | undefined) => string | undefined;
 }) {
   const { ref, focused } = useFocusable({
     focusKey: `cast-${index}`,
   });
+  const profileUrl = resolveArtwork(member.profile_url);
 
   return (
-    <div ref={ref} className={`${styles.castChip} ${focused ? styles.castChipFocused : ''}`}>
-      <span className={styles.castName}>{member.name}</span>
-      {member.character ? (
-        <span className={styles.castRole}>{member.character}</span>
-      ) : null}
+    <div ref={ref} className={`${styles.castCard} ${focused ? styles.castCardFocused : ''}`}>
+      <div className={styles.castPhotoFrame}>
+        {profileUrl ? (
+          <img className={styles.castPhoto} src={profileUrl} alt="" />
+        ) : (
+          <div className={styles.castPhotoPlaceholder}>{member.name.slice(0, 1)}</div>
+        )}
+      </div>
+      <div className={styles.castText}>
+        <span className={styles.castName}>{member.name}</span>
+        {member.character ? (
+          <span className={styles.castRole}>{member.character}</span>
+        ) : null}
+      </div>
     </div>
   );
 }
