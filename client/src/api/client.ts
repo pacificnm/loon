@@ -118,6 +118,18 @@ export async function fetchPerson(baseUrl: string, tmdbPersonId: number): Promis
   );
 }
 
+export async function fetchPersonForCast(
+  baseUrl: string,
+  movieSlug: string,
+  castName: string,
+): Promise<PersonDetail> {
+  const params = new URLSearchParams({
+    movie_slug: movieSlug,
+    name: castName,
+  });
+  return request<PersonDetail>(baseUrl, `/api/people/resolve?${params}`);
+}
+
 export async function searchMovies(
   baseUrl: string,
   query: string,

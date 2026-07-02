@@ -47,6 +47,50 @@ pub async fn get_person_detail(
     Ok(record_to_detail(&record, known_for))
 }
 
+/// Resolves a cast member on a movie to TMDB person details.
+pub async fn get_person_for_cast(
+    movie_slug: &str,
+    cast_name: &str,
+    repo: &LibraryRepository,
+    movies: &[LoonMovieRecord],
+    tmdb: &TmdbRuntime,
+    library_id: &str,
+) -> NestResult<PersonDetail> {
+    let mut record = repo
+        .get_by_slug(movie_slug)?
+        .ok_or_else(|| NestError::data(format!("movie '{movie_slug}' not found")))?;
+
+    if crate::services::cast_backfill::backfill_cast_person_ids(&mut record, tmdb).await? {
+        let stored = repo.get_file_by_path(&record.relative_path)?;
+        let (size_bytes, modified_secs) = stored
+            .map(|file| (file.size_bytes, file.modified_secs))
+            .unwrap_or((record.size_bytes.unwrap_or(0), record.modified_secs));
+        repo.upsert_movie(
+            library_id,
+            &record,
+            record.scanned_at,
+            size_bytes,
+            modified_secs,
+        )?;
+        if let Ok(mut catalog) = crate::state::catalog().write() {
+            catalog.insert(record.clone());
+        }
+    }
+
+    let person_id = record
+        .cast
+        .iter()
+        .find(|member| member.name.eq_ignore_ascii_case(cast_name))
+        .and_then(|member| member.tmdb_person_id)
+        .ok_or_else(|| {
+            NestError::data(format!(
+                "no TMDB person id for cast member '{cast_name}' on '{movie_slug}'"
+            ))
+        })?;
+
+    get_person_detail(person_id, repo, movies, tmdb).await
+}
+
 async fn get_or_fetch_person(
     tmdb_person_id: u32,
     repo: &LibraryRepository,

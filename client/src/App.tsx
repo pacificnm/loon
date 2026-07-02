@@ -61,6 +61,7 @@ function AppRoutes() {
         <Route path="admin" element={<AdminPage />} />
         <Route path="movie/:slug/edit" element={<MovieEditPage />} />
         <Route path="movie/:slug" element={<MovieDetailRoute />} />
+        <Route path="person/lookup" element={<PersonPage />} />
         <Route path="person/:tmdbId" element={<PersonPage />} />
       </Route>
       <Route path="play/:slug" element={<PlayerPage />} />

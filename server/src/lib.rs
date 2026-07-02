@@ -46,6 +46,7 @@ pub fn api_routes() -> RouteGroup {
         .post("/library/scan", api::library::start_scan)
         .get("/library/status", api::library::library_status)
         .get("/artwork/:slug/:kind", api::artwork::artwork)
+        .get("/people/resolve", api::people::resolve_person)
         .get("/people/:tmdb_id", api::people::get_person)
 }
 

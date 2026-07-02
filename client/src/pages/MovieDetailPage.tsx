@@ -10,7 +10,7 @@ import {
   setFavorite,
 } from '../api/client';
 import type { MovieDetail, MovieSummary } from '../api/types';
-import { FocusButton } from '../components/FocusButton';
+import { FocusButton, FocusTile } from '../components/FocusButton';
 import { HorizontalRow } from '../components/HorizontalRow';
 import { getServerUrl, resolveArtworkUrl } from '../config';
 import { CrewCreditsSection, FileDetailsSection } from './MovieFileDetails';
@@ -200,7 +200,15 @@ export function MovieDetailPage({
             <CastRow
               cast={detail.cast}
               resolveArtwork={resolveArtwork}
-              onSelectPerson={(personId) => navigate(`/person/${personId}`)}
+              onSelectPerson={(member) => {
+                if (member.tmdb_person_id) {
+                  navigate(`/person/${member.tmdb_person_id}`);
+                } else {
+                  navigate('/person/lookup', {
+                    state: { movieSlug: slug, castName: member.name },
+                  });
+                }
+              }}
             />
           ) : null}
 
@@ -230,7 +238,7 @@ function CastRow({
 }: {
   cast: MovieDetail['cast'];
   resolveArtwork: (path: string | undefined) => string | undefined;
-  onSelectPerson: (tmdbPersonId: number) => void;
+  onSelectPerson: (member: MovieDetail['cast'][number]) => void;
 }) {
   const { ref, focusKey } = useFocusable({
     focusable: false,
@@ -268,30 +276,15 @@ function CastCard({
   member: MovieDetail['cast'][number];
   index: number;
   resolveArtwork: (path: string | undefined) => string | undefined;
-  onSelectPerson: (tmdbPersonId: number) => void;
+  onSelectPerson: (member: MovieDetail['cast'][number]) => void;
 }) {
   const profileUrl = resolveArtwork(member.profile_url);
-  const canOpen = member.tmdb_person_id != null && member.tmdb_person_id > 0;
-  const { ref, focused } = useFocusable({
-    focusKey: `cast-${index}`,
-    onEnterPress: () => {
-      if (canOpen) {
-        onSelectPerson(member.tmdb_person_id!);
-      }
-    },
-  });
 
   return (
-    <div
-      ref={ref}
-      className={`${styles.castCard} ${focused ? styles.castCardFocused : ''} ${canOpen ? styles.castCardClickable : ''}`}
-      role={canOpen ? 'button' : undefined}
-      tabIndex={-1}
-      onClick={() => {
-        if (canOpen) {
-          onSelectPerson(member.tmdb_person_id!);
-        }
-      }}
+    <FocusTile
+      focusKey={`cast-${index}`}
+      className={styles.castCard}
+      onPress={() => onSelectPerson(member)}
     >
       <div className={styles.castPhotoFrame}>
         {profileUrl ? (
@@ -306,6 +299,6 @@ function CastCard({
           <span className={styles.castRole}>{member.character}</span>
         ) : null}
       </div>
-    </div>
+    </FocusTile>
   );
 }

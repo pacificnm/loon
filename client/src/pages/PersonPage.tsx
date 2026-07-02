@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   FocusContext,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
-import { fetchPerson } from '../api/client';
+import { fetchPerson, fetchPersonForCast } from '../api/client';
 import type { KnownForMovie, PersonDetail } from '../api/types';
 import { FocusButton } from '../components/FocusButton';
 import { getServerUrl, resolveArtworkUrl } from '../config';
@@ -25,6 +25,9 @@ function formatGender(code?: number): string | null {
 
 export function PersonPage() {
   const { tmdbId = '' } = useParams();
+  const location = useLocation();
+  const castLookup = location.state as { movieSlug?: string; castName?: string } | null;
+  const isLookup = tmdbId === 'lookup';
   const personId = Number.parseInt(tmdbId, 10);
   const server = getServerUrl();
   const navigate = useNavigate();
@@ -45,17 +48,27 @@ export function PersonPage() {
   );
 
   useEffect(() => {
-    if (!Number.isFinite(personId) || personId <= 0) {
-      setError('Invalid person id');
-      setLoading(false);
-      return;
-    }
-
     let cancelled = false;
     setLoading(true);
     setError(null);
 
-    void fetchPerson(server, personId)
+    const load = isLookup
+      ? (() => {
+          const movieSlug = castLookup?.movieSlug;
+          const castName = castLookup?.castName;
+          if (!movieSlug || !castName) {
+            return Promise.reject(new Error('Missing cast lookup context'));
+          }
+          return fetchPersonForCast(server, movieSlug, castName);
+        })()
+      : (() => {
+          if (!Number.isFinite(personId) || personId <= 0) {
+            return Promise.reject(new Error('Invalid person id'));
+          }
+          return fetchPerson(server, personId);
+        })();
+
+    void load
       .then((person) => {
         if (!cancelled) {
           setDetail(person);
@@ -76,7 +89,7 @@ export function PersonPage() {
     return () => {
       cancelled = true;
     };
-  }, [personId, server]);
+  }, [castLookup?.castName, castLookup?.movieSlug, isLookup, personId, server]);
 
   useEffect(() => {
     if (detail) {

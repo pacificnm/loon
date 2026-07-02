@@ -5,6 +5,7 @@ use nest_http_serve::{HttpResult, Json, RequestContext};
 use crate::db::{MovieListQuery, MovieSort};
 use crate::error::{invalid_request, movie_not_found};
 use crate::models::MovieListResponse;
+use crate::services::cast_backfill::backfill_cast_person_ids;
 use crate::services::catalog::LoonMovieRecord;
 use crate::state;
 
@@ -61,20 +62,54 @@ pub async fn list_movies(ctx: RequestContext) -> HttpResult {
 
 /// `GET /api/movies/:slug`
 pub async fn get_movie(ctx: RequestContext) -> HttpResult {
-    let slug = ctx.param("slug")?;
+    let slug = ctx.param("slug")?.to_string();
+    let app = state::app_state();
 
-    if let Ok(Some(record)) = state::repo().get_by_slug(slug) {
-        return Json(record.to_detail()).into_response();
+    let mut record = if let Ok(Some(record)) = state::repo().get_by_slug(&slug) {
+        record
+    } else {
+        let catalog = state::catalog();
+        let guard = catalog.read().expect("catalog lock poisoned");
+        guard
+            .get(&slug)
+            .cloned()
+            .ok_or_else(|| movie_not_found(&slug))?
+    };
+
+    if let Some(tmdb) = app.tmdb.as_ref() {
+        if backfill_cast_person_ids(&mut record, tmdb)
+            .await
+            .map_err(map_repo_error)?
+        {
+            persist_cast_backfill(&app, &record).map_err(map_repo_error)?;
+        }
     }
 
-    let catalog = state::catalog();
-    let guard = catalog.read().expect("catalog lock poisoned");
-    let movie = guard
-        .get(slug)
-        .map(LoonMovieRecord::to_detail)
-        .ok_or_else(|| movie_not_found(slug))?;
+    Json(record.to_detail()).into_response()
+}
 
-    Json(movie).into_response()
+fn persist_cast_backfill(
+    app: &std::sync::Arc<crate::state::AppState>,
+    record: &LoonMovieRecord,
+) -> nest_error::NestResult<()> {
+    let stored = app.repo.get_file_by_path(&record.relative_path)?;
+    let (size_bytes, modified_secs) = stored
+        .map(|file| (file.size_bytes, file.modified_secs))
+        .unwrap_or((record.size_bytes.unwrap_or(0), record.modified_secs));
+
+    app.repo.upsert_movie(
+        app.config.library.id.as_str(),
+        record,
+        record.scanned_at,
+        size_bytes,
+        modified_secs,
+    )?;
+
+    if let Ok(mut catalog) = state::catalog().write() {
+        catalog.insert(record.clone());
+    }
+
+    Ok(())
 }
 
 fn parse_u32(raw: Option<&str>, default: u32) -> Result<u32, nest_http_serve::ServeError> {

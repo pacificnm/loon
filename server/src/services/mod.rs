@@ -3,6 +3,7 @@
 pub mod ai;
 pub mod artwork;
 pub mod browse;
+pub mod cast_backfill;
 pub mod catalog;
 pub mod enrichment;
 pub mod filename_guess;
