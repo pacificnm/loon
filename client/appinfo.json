@@ -1,0 +1,17 @@
+{
+  "id": "com.pacificnm.loon",
+  "version": "0.1.0",
+  "vendor": "Pacific NM",
+  "type": "web",
+  "main": "index.html",
+  "title": "Loon",
+  "icon": "icon.png",
+  "largeIcon": "icon-large.png",
+  "appDescription": "Personal movie streaming for LG webOS",
+  "bgColor": "#090B10",
+  "iconColor": "#7DD3FC",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": true,
+  "handlesRelaunch": true,
+  "requiredPermissions": ["network.operation", "network.query"]
+}

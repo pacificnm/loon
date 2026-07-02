@@ -1,0 +1,25 @@
+.rowSection {
+  padding: 48px;
+}
+
+.rowTitle {
+  margin: 0 0 16px;
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  scroll-behavior: smooth;
+}
+
+.row::-webkit-scrollbar {
+  display: none;
+}
+
+.item {
+  flex: 0 0 auto;
+}

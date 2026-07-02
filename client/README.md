@@ -1,8 +1,20 @@
 # Loon webOS Client — UI Plan
 
-## Status: Planning
+## Status: W0 implemented (TV verification pending)
 
 TV-first UI specification for the **Loon webOS** client. All client source lives under this `client/` folder.
+
+**W0 spike:** Vite + React app with movie row, spatial focus, and video player. See [W0-SPIKE.md](W0-SPIKE.md).
+
+```bash
+cd client
+cp .env.example .env.local   # set VITE_LOON_SERVER
+npm install
+npm run dev                  # browser dev
+npm run package:webos        # dist + appinfo → package/
+ares-package -n package -o build   # -n: skip minify (Vite already minifies)
+ares-install --device emulator build/*.ipk
+```
 
 **Planning docs (this folder)**
 
