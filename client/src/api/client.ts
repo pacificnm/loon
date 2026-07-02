@@ -130,6 +130,37 @@ export async function fetchSimilarMovies(
   if (!genre) {
     return [];
   }
-  const list = await fetchMovies(baseUrl, { genre, limit: limit + 1, page: 1 });
+  const list = await fetchMovies(baseUrl, { genre, limit: limit + 1, page: 1, sort: 'title' });
   return list.movies.filter((movie) => movie.slug !== detail.slug).slice(0, limit);
+}
+
+/** Fetch every page of the movie list, sorted by title on the server. */
+export async function fetchAllMovies(
+  baseUrl: string,
+  options: Omit<ListMoviesOptions, 'page' | 'limit'> = {},
+): Promise<MovieSummary[]> {
+  const pageSize = 100;
+  const first = await fetchMovies(baseUrl, {
+    ...options,
+    page: 1,
+    limit: pageSize,
+    sort: 'title',
+  });
+
+  const movies = [...first.movies];
+  const pages = first.pages ?? 1;
+
+  for (let page = 2; page <= pages; page += 1) {
+    const next = await fetchMovies(baseUrl, {
+      ...options,
+      page,
+      limit: pageSize,
+      sort: 'title',
+    });
+    movies.push(...next.movies);
+  }
+
+  return movies.sort((a, b) =>
+    a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }),
+  );
 }

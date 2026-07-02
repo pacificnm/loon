@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchMovies } from '../api/client';
+import { fetchAllMovies } from '../api/client';
 import type { MovieSummary } from '../api/types';
-import { MovieVerticalList } from '../components/MovieVerticalList';
+import { MovieAlphabetList } from '../components/MovieAlphabetList';
 import { getServerUrl } from '../config';
 import styles from './page.module.css';
 
@@ -22,13 +22,8 @@ export function MoviesPage({ focusEpoch, genre }: MoviesPageProps) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetchMovies(server, {
-        page: 1,
-        limit: 100,
-        sort: 'title',
-        genre,
-      });
-      setMovies(response.movies);
+      const list = await fetchAllMovies(server, { genre });
+      setMovies(list);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load movies');
     } finally {
@@ -53,7 +48,7 @@ export function MoviesPage({ focusEpoch, genre }: MoviesPageProps) {
         </div>
       ) : null}
       {!loading && !error ? (
-        <MovieVerticalList
+        <MovieAlphabetList
           movies={movies}
           server={server}
           focusEpoch={focusEpoch}
