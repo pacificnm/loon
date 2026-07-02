@@ -16,8 +16,23 @@ mkdirSync(out, { recursive: true });
 
 cpSync(dist, out, { recursive: true });
 copyFileSync(join(root, 'appinfo.json'), join(out, 'appinfo.json'));
-copyFileSync(join(root, 'public', 'icon.png'), join(out, 'icon.png'));
-copyFileSync(join(root, 'public', 'icon-large.png'), join(out, 'icon-large.png'));
+
+// Icons must sit next to appinfo.json (webOS resolves paths from app root, not public/).
+for (const name of ['icon.png', 'icon-large.png']) {
+  const src = join(root, name);
+  if (!existsSync(src)) {
+    console.error(`Missing ${name} — place it in client/ next to appinfo.json`);
+    process.exit(1);
+  }
+  copyFileSync(src, join(out, name));
+}
 
 console.log(`webOS package root ready: ${out}`);
-console.log('Run: ares-package package -o build');
+console.log('');
+console.log('Simulator (folder — no IPK):');
+console.log(`  ares-launch -s 26 ${out}`);
+console.log('  npm run launch:simulator');
+console.log('');
+console.log('TV / emulator (IPK):');
+console.log('  ares-package -n package -o build');
+console.log('  ares-install --device emulator build/*.ipk');

@@ -11,9 +11,39 @@ cd client
 cp .env.example .env.local   # set VITE_LOON_SERVER
 npm install
 npm run dev                  # browser dev
-npm run package:webos        # dist + appinfo → package/
+npm run package:webos        # dist + appinfo + icons → package/
+```
+
+### webOS TV Simulator (2026+)
+
+The simulator runs the **whole app folder** (where `appinfo.json` lives). Do **not** install an IPK.
+
+```bash
+npm run launch:simulator     # builds package/ then launches
+# or manually:
+ares-launch -s 26 package
+```
+
+`package/` must contain at the root: `appinfo.json`, `icon.png`, `icon-large.png`, `index.html`, `assets/`.
+
+If the simulator is on another machine, copy the whole `package/` folder (not just the IPK):
+
+```bash
+npm run package:webos
+scp -r package/ user@SIM-BOX:~/loon-package/
+# on SIM-BOX:
+ares-launch -s 26 ~/loon-package
+```
+
+Set `WEBOS_SIM_VERSION=26` or `WEBOS_SIM_PATH=/path/to/simulator` if needed.
+
+### TV / legacy emulator (IPK)
+
+```bash
+npm run package:webos
 ares-package -n package -o build   # -n: skip minify (Vite already minifies)
 ares-install --device emulator build/*.ipk
+ares-launch --device emulator com.pacificnm.loon
 ```
 
 **Planning docs (this folder)**

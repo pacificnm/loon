@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "package:webos": "npm run build && node scripts/prepare-webos-package.mjs"
+    "package:webos": "npm run build && node scripts/prepare-webos-package.mjs",
+    "launch:simulator": "npm run package:webos && node scripts/launch-simulator.mjs"
   },
   "dependencies": {
     "@noriginmedia/norigin-spatial-navigation": "^2.3.0",
