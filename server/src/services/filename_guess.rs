@@ -40,15 +40,9 @@ pub async fn guess_movie_from_filename(
         .and_then(|name| name.to_str())
         .unwrap_or(relative_path);
 
-    let request = CompletionRequest {
-        model: None,
-        messages: vec![
-            ChatMessage::system(SYSTEM_PROMPT),
-            ChatMessage::user(format!("Filename: {filename}")),
-        ],
-        format: Some(ResponseFormat::Json),
-        tools: Vec::new(),
-    };
+    let mut request = CompletionRequest::user_message(format!("Filename: {filename}"));
+    request.messages.insert(0, ChatMessage::system(SYSTEM_PROMPT));
+    request.format = Some(ResponseFormat::Json);
 
     let response = match ai.provider.complete(request).await {
         Ok(response) => response,
