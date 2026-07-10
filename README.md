@@ -1,213 +1,167 @@
 # Loon
 
-> A lightweight, self-hosted movie streaming server and webOS client built with Rust and the Nest Framework.
+> A lightweight, self-hosted movie streaming system for LG webOS TVs.
 
-## Vision
+## Overview
 
-Loon is a personal movie streaming system designed specifically for LG webOS televisions.
+Loon is a personal movie streaming system with three components:
 
-The project consists of:
+| Application | Description | Docs |
+|-------------|-------------|------|
+| **Server** | Rust backend API for movie streaming | [Server Docs](server/docs/) |
+| **Client** | LG webOS TV application (React) | [Client Docs](client/docs/) |
+| **Desktop** | Tauri admin UI for library management | [Desktop Docs](desktop/docs/) |
 
-* **Loon Server** — A Rust application running on a home server that manages the movie library and streams media.
-* **Loon webOS** — A native LG webOS application built with React that provides a beautiful, remote-friendly user experience.
-* **Loon Admin Desktop** — A Tauri + React admin app for library management, TMDB matching, and server settings.
-
-Loon is intentionally designed for a single platform. Rather than attempting to support every Smart TV, browser, or mobile device, it focuses entirely on delivering the best possible experience for LG webOS.
-
----
-
-# Goals
-
-* Beautiful Netflix-inspired interface
-* Extremely fast browsing
-* Instant playback
-* Lightweight server
-* Modern Rust architecture
-* Self-hosted
-* API-first backend
-* Native LG webOS experience
-
----
-
-# Non-Goals
-
-Loon is **not** intended to become another Plex, Kodi, or Jellyfin.
-
-The project intentionally excludes:
-
-* Live TV
-* DVR
-* IPTV
-* Music
-* Photos
-* Plugin systems
-* Mobile applications
-* Desktop video clients (playback is webOS only)
-* Browser clients
-* Multiple TV platforms
-* Docker / container deployment
-
-The only supported **video client** is **LG webOS**.
-
-A **desktop admin app** (Tauri + React) exists for library management, TMDB matching, and server settings — but not for watching movies.
-
----
-
-# Design Principles
-
-## LG webOS First
-
-Every design decision should optimize the experience for LG televisions.
-
-The interface should be designed for:
-
-* Large displays
-* TV remotes
-* 10-foot viewing distance
-* Fast navigation
-* Minimal clicks
-
-Keyboard and mouse interaction are not design goals.
-
----
-
-## Performance First
-
-Movies should stream directly whenever possible.
-
-Avoid unnecessary transcoding.
-
-Background processing should never impact playback.
-
----
-
-## Simple Architecture
-
-```text
-LG webOS App
-        │
-HTTP API
-        │
-Loon Server
-        │
-Movie Library
 ```
-
-There are only two applications.
-
----
-
-## API First
-
-The webOS application communicates exclusively through HTTP APIs.
-
-The frontend contains presentation logic only.
-
-All media management lives on the server.
-
----
-
-## Modular Backend
-
-Loon is built using reusable Nest modules.
-
-Example Nest crates Loon composes:
-
-* [`nest-http-serve`](../../docs/nest-http-serve/README.md) — HTTP host
-* [`nest-file`](../../docs/nest-file/README.md) — scoped filesystem I/O
-* [`nest-media`](../../docs/nest-media/README.md) — media types + provider traits
-* [`nest-media-library`](../../docs/nest-media-library/README.md) — library scan/index
-* [`nest-tmdb`](../../docs/nest-tmdb/README.md) — TMDB metadata
-* [`nest-transcode`](../../docs/nest-transcode/README.md) — FFprobe inspection
-* [`nest-config`](../../docs/nest-config/README.md) — TOML configuration
-* [`nest-data-sqlite`](../../docs/nest-data-sqlite/README.md) — SQLite (v0.2 catalog)
-
-Planned extractions: [`nest-stream`](../../docs/plan/nest-stream-v1.md), [`nest-cache`](../../docs/plan/nest-cache-v1.md).
-
-Application-specific logic (routes, slugs, catalog, webOS UX) stays in the Loon repo.
-
----
-
-# User Experience
-
-The experience should resemble modern streaming services.
-
-Features include:
-
-* Hero banner
-* Large movie artwork
-* Genre rows
-* Continue Watching
-* Recently Added
-* Instant search
-* Movie details
-* Resume playback
-
-Configuration should be minimal.
-
-Users should spend their time watching movies, not configuring software.
-
----
-
-# Architecture
-
-```text
-Loon webOS
-(Vite + React)
-
-        │
-
-HTTP JSON API
-
-        │
-
-Loon Server
-(Rust)
-
-        │
-
-Movie Library
+┌─────────────────────┐         ┌─────────────────────┐
+│   Loon Client       │         │   Loon Desktop      │
+│   (webOS TV)        │         │   (Tauri Admin)     │
+└──────────┬──────────┘         └──────────┬──────────┘
+           │                               │
+           └───────────────┬───────────────┘
+                           ▼
+                 ┌─────────────────────┐
+                 │    Loon Server      │
+                 │    (Rust + SQLite)  │
+                 └──────────┬──────────┘
+                            ▼
+                 ┌─────────────────────┐
+                 │   Media Library     │
+                 └─────────────────────┘
 ```
 
 ---
 
-# Long-Term Vision
+## Goals
 
-Loon exists to provide the best possible personal movie streaming experience on LG webOS televisions.
-
-Instead of supporting every device and feature imaginable, Loon embraces a focused philosophy:
-
-**Do one thing exceptionally well.**
+- Beautiful Netflix-inspired interface for LG webOS
+- Extremely fast browsing and instant playback
+- Lightweight Rust server with SQLite storage
+- Self-hosted, API-first architecture
+- Minimal configuration required
 
 ---
 
-# Documentation
+## Non-Goals
 
-### Product
+Loon is **not** trying to be Plex, Kodi, or Jellyfin. It excludes:
 
-- [README](../README.md) — vision, non-goals, UX goals
+- Live TV, DVR, IPTV
+- Music, Photos, Plugins
+- Mobile or browser clients
+- Multiple TV platforms
+- Docker deployment
 
-### Server
+**The only supported video client is LG webOS.**
 
-- [API reference](docs/api.md) — implemented routes (v0.1)
-- [API roadmap](docs/api-roadmap.md) — **finish server API before UI**
-- [v1 plan](docs/v1.md) — phases, stream, data model, ops
-- [api-v0.2](docs/api-v0.2.md) — browse, search, progress, favorites (spec)
-- [data-v1](data-v1.md) — SQLite repository, migrations
-- [repo-v1](repo-v1.md) — Git repo layout, CI, Cargo workspace
-- [setup-v1](setup-v1.md) — native install, systemd, first-run
-- [implementation-v1](implementation-v1.md) — build checklist
+The Desktop app is for **administration only** (library management, TMDB matching, settings) — not for watching movies.
 
-### webOS client
+---
 
-- [webos-v1](webos-v1.md) — screens, player, packaging
-- [webos-test-checklist](webos-test-checklist.md) — manual LG TV tests
+## Quick Start
 
-### Desktop Admin
+### 1. Install Server
 
-- [desktop/README.md](desktop/README.md) — Tauri + React admin app
-- [desktop/docs/v1.md](desktop/docs/v1.md) — implementation plan
+```bash
+cd apps/loon/server
+./build dev
+```
 
-### Config
+Configure `~/.config/loon/config.toml`:
+```toml
+[loon]
+bind = "0.0.0.0:3000"
+media_root = "/mnt/media"
 
-- [config.example.toml](../config.example.toml)
+[tmdb]
+api_key = "${TMDB_API_KEY}"
+```
+
+### 2. Build Client
+
+```bash
+cd apps/loon/client
+npm install
+npm run build
+npm run package:webos
+```
+
+Deploy `package/` to your LG webOS TV.
+
+### 3. Configure
+
+On the TV:
+1. Open Loon app
+2. Go to Admin → Settings
+3. Enter server URL (e.g., `http://192.168.1.100:3000`)
+
+---
+
+## Documentation
+
+| Category | Link |
+|----------|------|
+| **Main Docs** | [docs/README.md](docs/) |
+| **Server** | [server/docs/](server/docs/) |
+| **Client** | [client/docs/](client/docs/) |
+| **Desktop** | [desktop/docs/](desktop/docs/) |
+
+### Key Guides
+
+- [Server Configuration](server/docs/06-configuration.md)
+- [Server API Reference](server/docs/02-api-reference.md)
+- [Client Components](client/docs/02-components.md)
+- [Client Platform (webOS)](client/docs/05-platform.md)
+- [Desktop Setup](desktop/docs/06-configuration.md)
+
+---
+
+## API Summary
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/health` | Health check |
+| `GET` | `/api/movies` | List movies |
+| `GET` | `/api/movies/:slug` | Movie details |
+| `GET` | `/stream/:slug` | Video stream |
+| `POST` | `/api/library/scan` | Start scan (SSE) |
+| `PUT` | `/api/movies/:slug/favorite` | Toggle favorite |
+| `GET` | `/api/browse` | Netflix-style feed |
+| `GET` | `/api/search?q=` | Title search |
+
+See [Server API Reference](server/docs/02-api-reference.md) for full documentation.
+
+---
+
+## Technology Stack
+
+| Layer | Server | Client | Desktop |
+|-------|--------|--------|---------|
+| **Language** | Rust | TypeScript | Rust + TypeScript |
+| **Framework** | nest-http-serve | React 18 | Tauri 2 + React |
+| **Database** | SQLite | — | — |
+| **Video** | Byte-range streaming | HTML5 | HTML5 + ffplay/mpv |
+
+---
+
+## Development
+
+```bash
+# Server
+cd apps/loon/server && ./build dev
+
+# Client
+cd apps/loon/client && npm run dev
+
+# Desktop
+cd apps/loon/desktop && ./build dev
+
+# Run tests
+./build test  # in each app directory
+```
+
+---
+
+## License
+
+MIT OR Apache-2.0
