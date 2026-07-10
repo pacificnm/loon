@@ -1,0 +1,20 @@
+{
+  "$schema": "https://tauri.app/v2/guides/features/schema.json",
+  "identifier": "loon-admin-capabilities",
+  "description": "Capabilities for Loon Admin",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "loon:default",
+    "core:window:default",
+    "core:window:allow-set-title",
+    "core:window:allow-set-size",
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-is-maximized",
+    "core:window:allow-start-dragging",
+    "opener:default",
+    "opener:allow-open-url"
+  ]
+}

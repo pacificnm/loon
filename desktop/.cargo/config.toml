@@ -7,3 +7,7 @@ nest-error = { path = "../../../core/crates/nest-error" }
 nest-gui = { path = "../../../core/crates/nest-gui" }
 nest-logging = { path = "../../../core/crates/nest-logging" }
 nest-theme = { path = "../../../core/crates/nest-theme" }
+nest-icon = { path = "../../../core/crates/nest-icon" }
+nest-image = { path = "../../../core/crates/nest-image" }
+nest-cache = { path = "../../../core/crates/nest-cache" }
+nest-cache-file = { path = "../../../modules/crates/nest-cache-file" }

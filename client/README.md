@@ -35,9 +35,19 @@ scp -r package/ user@SIM-BOX:~/loon-package/
 ares-launch -s 26 ~/loon-package
 ```
 
-Set `WEBOS_SIM_VERSION=26` or `WEBOS_SIM_PATH=/path/to/simulator` if needed.
+Set `WEBOS_SIM_VERSION=26` if needed.
 
-**Ubuntu 24+ / remote desktop:** `ares-launch` cannot pass Chromium flags. Export your AppImage path, then use the wrapper (default on Linux):
+**After moving the repo**, refresh simulator paths (fixes stale entries in `~/.webos` and `~/.config/webos-simulator`):
+
+```bash
+export WEBOS_SIM_APPIMAGE=~/Downloads/webOS_TV_26_Simulator_1.5.0/webOS_TV_26_Simulator_1.5.0.AppImage
+npm run fix:simulator-path   # AppImage *directory* in ares config; appEntries → package/
+npm run launch:simulator
+```
+
+`simulator-config.json` must point at the folder containing the `.AppImage`, **not** `scripts/webos-simulator.sh`.
+
+**Ubuntu 24+ / remote desktop:** `ares-launch` cannot pass Chromium flags. On Linux, `launch:simulator` uses the wrapper (needs `WEBOS_SIM_APPIMAGE`):
 
 ```bash
 export WEBOS_SIM_APPIMAGE=~/webOS_TV_26_Simulator_1.5.0.AppImage

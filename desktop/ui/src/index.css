@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --loon-bg: #090B10;
+  --loon-fg: #E2E8F0;
+  --loon-primary: #7DD3FC;
+  --loon-secondary: #64748B;
+  --loon-border: #1E293B;
+  --loon-surface: #111827;
+  --loon-accent: #38BDF8;
+  --loon-muted: #94A3B8;
+  --loon-success: #22C55E;
+  --loon-warning: #F59E0B;
+  --loon-error: #EF4444;
+  --loon-info: #38BDF8;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--loon-bg);
+  color: var(--loon-fg);
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}

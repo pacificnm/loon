@@ -4,6 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Loon</title>
+    <!-- webOS TV 5.x Chromium lacks globalThis; Vite's bundle references it. -->
+    <script>
+      (function (g) {
+        if (!g.globalThis) {
+          g.globalThis = g;
+        }
+      })(
+        typeof self !== 'undefined'
+          ? self
+          : typeof window !== 'undefined'
+            ? window
+            : this,
+      );
+    </script>
   </head>
   <body>
     <div id="root"></div>

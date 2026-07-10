@@ -6,10 +6,11 @@
 
 Loon is a personal movie streaming system designed specifically for LG webOS televisions.
 
-The project consists of two applications:
+The project consists of:
 
 * **Loon Server** — A Rust application running on a home server that manages the movie library and streams media.
 * **Loon webOS** — A native LG webOS application built with React that provides a beautiful, remote-friendly user experience.
+* **Loon Admin Desktop** — A Tauri + React admin app for library management, TMDB matching, and server settings.
 
 Loon is intentionally designed for a single platform. Rather than attempting to support every Smart TV, browser, or mobile device, it focuses entirely on delivering the best possible experience for LG webOS.
 
@@ -41,12 +42,14 @@ The project intentionally excludes:
 * Photos
 * Plugin systems
 * Mobile applications
-* Desktop clients
+* Desktop video clients (playback is webOS only)
 * Browser clients
 * Multiple TV platforms
 * Docker / container deployment
 
-The only supported client is **LG webOS**.
+The only supported **video client** is **LG webOS**.
+
+A **desktop admin app** (Tauri + React) exists for library management, TMDB matching, and server settings — but not for watching movies.
 
 ---
 
@@ -199,6 +202,11 @@ Instead of supporting every device and feature imaginable, Loon embraces a focus
 
 - [webos-v1](webos-v1.md) — screens, player, packaging
 - [webos-test-checklist](webos-test-checklist.md) — manual LG TV tests
+
+### Desktop Admin
+
+- [desktop/README.md](desktop/README.md) — Tauri + React admin app
+- [desktop/docs/v1.md](desktop/docs/v1.md) — implementation plan
 
 ### Config
 

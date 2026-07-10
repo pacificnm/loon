@@ -1,13 +1,25 @@
+//! webOS TV platform hooks (PalmSystem / lifecycle events).
+
 declare global {
   interface Window {
     PalmSystem?: {
       activate: () => void;
       platformBack?: () => void;
     };
+    webOSSystem?: {
+      activate: () => void;
+      platformBack?: () => void;
+    };
   }
 }
 
+function activateApp(): void {
+  window.webOSSystem?.activate?.();
+  window.PalmSystem?.activate?.();
+}
+
 export function exitWebOsApp(): void {
+  window.webOSSystem?.platformBack?.();
   window.PalmSystem?.platformBack?.();
 }
 
@@ -15,14 +27,22 @@ export type WebOsRelaunchHandler = () => void;
 
 /** Register webOS TV lifecycle hooks. Required when appinfo.json sets handlesRelaunch: true. */
 export function registerWebOsLifecycle(onRelaunch: WebOsRelaunchHandler): () => void {
-  const handleRelaunch = () => {
-    // Platform shows the app only after the handler calls activate().
-    window.PalmSystem?.activate();
+  const handleShow = () => {
+    // handlesRelaunch: true — platform waits for activate() before showing the app.
+    activateApp();
     onRelaunch();
   };
 
-  document.addEventListener('webOSRelaunch', handleRelaunch);
-  return () => document.removeEventListener('webOSRelaunch', handleRelaunch);
+  document.addEventListener('webOSRelaunch', handleShow);
+  document.addEventListener('webOSLaunch', handleShow);
+
+  // Cold start with handlesRelaunch still needs activate on some webOS builds.
+  activateApp();
+
+  return () => {
+    document.removeEventListener('webOSRelaunch', handleShow);
+    document.removeEventListener('webOSLaunch', handleShow);
+  };
 }
 
 export function registerVisibilityHandler(onHidden: () => void, onVisible?: () => void): () => void {

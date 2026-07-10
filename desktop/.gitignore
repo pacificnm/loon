@@ -1,0 +1,15 @@
+# Tauri
+src-tauri/target/
+src-tauri/**/*.log
+
+# UI
+ui/node_modules/
+ui/dist/
+ui/*.log
+
+# Config
+config.toml
+
+# Build
+build/
+cache/

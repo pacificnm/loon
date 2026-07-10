@@ -1,56 +1,52 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
+# Loon Admin Desktop — thin Tauri UI for the Loon backend API.
+# Not the webOS TV client (apps/loon/client) and not the server (apps/loon/server).
 
-DESKTOP_ROOT="$(cd "$(dirname "$0")" && pwd)"
-LOON_ROOT="$(cd "$DESKTOP_ROOT/.." && pwd)"
-export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$LOON_ROOT/target}"
-export RUSTFLAGS="${RUSTFLAGS:--D warnings}"
+set -e
 
-cd "$DESKTOP_ROOT"
+cd "$(dirname "$0")"
+export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$(pwd)/target}"
 
-cmd="${1:-build}"
-shift || true
+usage() {
+    echo "Usage: $0 {run|dev|build|clean}"
+    echo ""
+    echo "  run    Build UI + release binary, launch desktop admin"
+    echo "  dev    Tauri dev (Vite :5173 + hot reload)"
+    echo "  build  Production binary only"
+    echo "  clean  Remove build artifacts"
+    exit 1
+}
 
-case "$cmd" in
-  build)
-    cargo build -p loon-admin "$@"
-    ;;
-  release)
-    cargo build -p loon-admin --release "$@"
-    ;;
-  run)
-    profile=debug
-    if [[ "${1:-}" == "--release" ]]; then
-      profile=release
-      shift
+ensure_ui_deps() {
+    if [[ ! -d ui/node_modules ]]; then
+        npm install --prefix ui
     fi
-    bin="$LOON_ROOT/target/$profile/loon-admin"
-    if [[ ! -x "$bin" ]]; then
-      if [[ "$profile" == release ]]; then
-        cargo build -p loon-admin --release
-      else
-        cargo build -p loon-admin
-      fi
-    fi
-    config_args=()
-    if [[ -f "$DESKTOP_ROOT/config.toml" ]]; then
-      config_args=(--config "$DESKTOP_ROOT/config.toml")
-    fi
-    if [[ "${1:-}" == "--" ]]; then
-      shift
-    fi
-    exec "$bin" "${config_args[@]}" "$@"
-    ;;
-  test)
-    cargo test --workspace -- --test-threads=1 "$@"
-    ;;
-  check)
-    cargo fmt --all -- --check
-    cargo clippy --workspace -- -D warnings
-    cargo test --workspace -- --test-threads=1
-    cargo build -p loon-admin --release
-    ;;
-  *)
-    cargo "$cmd" "$@"
-    ;;
+}
+
+case "${1:-}" in
+    run)
+        echo "Running Loon Admin desktop..."
+        ensure_ui_deps
+        npm run build --prefix ui
+        cargo build --release -p loon-desktop
+        exec ./target/release/loon-desktop
+        ;;
+    dev)
+        echo "Running Loon Admin desktop (dev)..."
+        ensure_ui_deps
+        npm run tauri:dev --prefix ui
+        ;;
+    build)
+        echo "Building Loon Admin desktop..."
+        ensure_ui_deps
+        npm run build --prefix ui
+        cargo build --release -p loon-desktop
+        echo "Binary: $(pwd)/target/release/loon-desktop"
+        ;;
+    clean)
+        rm -rf ui/dist ui/node_modules target
+        ;;
+    *)
+        usage
+        ;;
 esac

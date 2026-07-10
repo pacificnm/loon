@@ -1,0 +1,21 @@
+[package]
+name = "loon-desktop"
+version = "0.1.0"
+description = "Loon Admin Desktop — thin Tauri shell for the Loon backend API"
+edition = "2021"
+rust-version = "1.75"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+nest-config = { workspace = true }
+nest-error = { workspace = true }
+nest-tauri = { workspace = true, features = ["runtime"] }
+nest-theme = { workspace = true }
+serde = { version = "1", features = ["derive"] }
+tauri = { workspace = true, features = ["custom-protocol"] }
+tauri-plugin-opener = "2"
+
+[dev-dependencies]
+tempfile = "3"

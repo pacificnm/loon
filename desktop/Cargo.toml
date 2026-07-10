@@ -1,8 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/loon-admin",
-    "crates/loon-egui-theme",
+    "src-tauri",
 ]
 
 [workspace.package]
@@ -12,19 +11,12 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/pacificnm/loon"
 
 [workspace.dependencies]
-nest-app = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-cache = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-cache-file = { git = "https://github.com/pacificnm/nest", branch = "main" }
 nest-config = { git = "https://github.com/pacificnm/nest", branch = "main" }
-nest-core = { git = "https://github.com/pacificnm/nest", branch = "main" }
-nest-design = { git = "https://github.com/pacificnm/nest", branch = "main" }
 nest-error = { git = "https://github.com/pacificnm/nest", branch = "main" }
-nest-gui = { git = "https://github.com/pacificnm/nest", branch = "main" }
-nest-logging = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-image = { git = "https://github.com/pacificnm/nest", branch = "main" }
+nest-tauri = { git = "https://github.com/pacificnm/nest", branch = "main" }
 nest-theme = { git = "https://github.com/pacificnm/nest", branch = "main" }
-egui = "0.31"
-egui_extras = { version = "0.31", features = ["image", "http"] }
-eframe = { version = "0.31", default-features = true }
-reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-urlencoding = "2"
+tauri = { version = "2" }
 tracing = "0.1"

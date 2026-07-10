@@ -1,13 +1,17 @@
-# Loon Admin desktop — copy to config.toml and adjust.
+# Copy to ~/.config/loon/config.toml
+#
+# Loon has three apps:
+#   server  — apps/loon/server     (backend API, e.g. :3000)
+#   client  — apps/loon/client     (LG webOS TV)
+#   desktop — apps/loon/desktop    (this admin UI — talks to server only)
 
 [gui]
 title = "Loon Admin"
 width = 1280
 height = 800
-vsync = true
 
 [loon-admin]
-server_url = "http://127.0.0.1:3000"
+server_url = "http://192.168.88.10:3000"
 
 [logging]
 level = "info"

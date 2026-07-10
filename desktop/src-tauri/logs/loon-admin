@@ -1,0 +1,3 @@
+  2026-07-09T22:05:53.611081Z  INFO nest_app::lifecycle: app startup, app.name: loon-admin, app.version: "", app.environment: "development"
+    at /data/projects/nest/core/crates/nest-app/src/lifecycle.rs:23
+

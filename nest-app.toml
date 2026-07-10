@@ -1,0 +1,7 @@
+# Nest Shell manifest — registers Loon with the desktop launcher.
+
+[shell]
+name = "Loon"
+category = "Media"
+icon = "fa-solid fa-film"
+description = "Media library and streaming for webOS TV."
