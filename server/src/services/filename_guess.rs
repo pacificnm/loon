@@ -47,6 +47,7 @@ pub async fn guess_movie_from_filename(
             ChatMessage::user(format!("Filename: {filename}")),
         ],
         format: Some(ResponseFormat::Json),
+        tools: Vec::new(),
     };
 
     let response = match ai.provider.complete(request).await {
