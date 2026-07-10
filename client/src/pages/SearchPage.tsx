@@ -7,7 +7,7 @@ import {
 import { searchMovies } from '../api/client';
 import type { MovieSummary } from '../api/types';
 import { MovieVerticalList } from '../components/MovieVerticalList';
-import { getServerUrl } from '../config';
+import { useServerUrl } from '../config';
 import styles from './page.module.css';
 
 interface SearchPageProps {
@@ -15,7 +15,7 @@ interface SearchPageProps {
 }
 
 export function SearchPage({ focusEpoch }: SearchPageProps) {
-  const server = getServerUrl();
+  const server = useServerUrl();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [movies, setMovies] = useState<MovieSummary[]>([]);
@@ -35,6 +35,11 @@ export function SearchPage({ focusEpoch }: SearchPageProps) {
       if (trimmed.length < 2) {
         setMovies([]);
         setError(null);
+        return;
+      }
+      if (!server) {
+        setError('No server configured. Open Admin → Settings.');
+        setMovies([]);
         return;
       }
       setLoading(true);
@@ -73,7 +78,7 @@ export function SearchPage({ focusEpoch }: SearchPageProps) {
       </FocusContext.Provider>
       {loading ? <p className={styles.status}>Searching…</p> : null}
       {error ? <p className={styles.errorText}>{error}</p> : null}
-      {!loading && !error && query.trim().length >= 2 ? (
+      {!loading && !error && server && query.trim().length >= 2 ? (
         <MovieVerticalList
           movies={movies}
           server={server}

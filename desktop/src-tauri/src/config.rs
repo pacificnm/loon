@@ -10,6 +10,9 @@ use serde::Deserialize;
 #[derive(Debug, Clone, Deserialize)]
 pub struct LoonAdminSection {
     pub server_url: String,
+    /// Optional path to ffplay, mpv, or another HTTP-capable player binary.
+    #[serde(default)]
+    pub player_path: Option<String>,
 }
 
 /// Loaded desktop configuration.
@@ -17,6 +20,7 @@ pub struct LoonAdminSection {
 pub struct LoonDesktopConfig {
     pub config_path: PathBuf,
     pub server_url: String,
+    pub player_path: Option<String>,
 }
 
 impl LoonDesktopConfig {
@@ -35,6 +39,7 @@ impl LoonDesktopConfig {
         Ok(Self {
             config_path: path.to_path_buf(),
             server_url,
+            player_path: section.player_path,
         })
     }
 }

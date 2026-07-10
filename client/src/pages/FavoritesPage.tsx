@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchFavorites } from '../api/client';
 import type { MovieSummary } from '../api/types';
 import { MovieVerticalList } from '../components/MovieVerticalList';
-import { getServerUrl } from '../config';
+import { useServerUrl } from '../config';
 import styles from './page.module.css';
 
 interface FavoritesPageProps {
@@ -11,13 +11,19 @@ interface FavoritesPageProps {
 }
 
 export function FavoritesPage({ focusEpoch }: FavoritesPageProps) {
-  const server = getServerUrl();
+  const server = useServerUrl();
   const navigate = useNavigate();
   const [movies, setMovies] = useState<MovieSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    if (!server) {
+      setLoading(false);
+      setMovies([]);
+      setError('No server configured. Open Admin → Settings.');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -38,7 +44,7 @@ export function FavoritesPage({ focusEpoch }: FavoritesPageProps) {
       <h1 className={styles.heading}>Favorites</h1>
       {loading ? <p className={styles.status}>Loading favorites…</p> : null}
       {error ? <p className={styles.errorText}>{error}</p> : null}
-      {!loading && !error ? (
+      {!loading && !error && server ? (
         <MovieVerticalList
           movies={movies}
           server={server}

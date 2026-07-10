@@ -2361,10 +2361,10 @@
           "markdownDescription": "Denies the unminimize command without any pre-configured scope."
         },
         {
-          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-get-config`",
+          "description": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-get-config`\n- `allow-play-stream`",
           "type": "string",
           "const": "loon:default",
-          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-get-config`"
+          "markdownDescription": "Default plugin permissions.\n#### This default permission set includes:\n\n- `allow-get-config`\n- `allow-play-stream`"
         },
         {
           "description": "Enables the get_config command without any pre-configured scope.",
@@ -2373,10 +2373,22 @@
           "markdownDescription": "Enables the get_config command without any pre-configured scope."
         },
         {
+          "description": "Enables the play_stream command without any pre-configured scope.",
+          "type": "string",
+          "const": "loon:allow-play-stream",
+          "markdownDescription": "Enables the play_stream command without any pre-configured scope."
+        },
+        {
           "description": "Denies the get_config command without any pre-configured scope.",
           "type": "string",
           "const": "loon:deny-get-config",
           "markdownDescription": "Denies the get_config command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the play_stream command without any pre-configured scope.",
+          "type": "string",
+          "const": "loon:deny-play-stream",
+          "markdownDescription": "Denies the play_stream command without any pre-configured scope."
         },
         {
           "description": "This permission set allows opening `mailto:`, `tel:`, `https://` and `http://` urls using their default application\nas well as reveal file in directories using default file explorer\n#### This default permission set includes:\n\n- `allow-open-url`\n- `allow-reveal-item-in-dir`\n- `allow-default-urls`",

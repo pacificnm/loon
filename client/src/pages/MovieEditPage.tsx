@@ -6,13 +6,13 @@ import {
 } from '@noriginmedia/norigin-spatial-navigation';
 import { fetchMovie, LoonApiError, setMovieTmdbMatch } from '../api/client';
 import { FocusButton } from '../components/FocusButton';
-import { getServerUrl } from '../config';
+import { useServerUrl } from '../config';
 import styles from './MovieEditPage.module.css';
 import pageStyles from './page.module.css';
 
 export function MovieEditPage() {
   const { slug = '' } = useParams();
-  const server = getServerUrl();
+  const server = useServerUrl();
   const navigate = useNavigate();
   const [tmdbId, setTmdbId] = useState('');
   const [loading, setLoading] = useState(true);
@@ -28,6 +28,11 @@ export function MovieEditPage() {
   });
 
   useEffect(() => {
+    if (!server) {
+      setLoading(false);
+      setError('No server configured. Open Admin → Settings.');
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -67,6 +72,10 @@ export function MovieEditPage() {
     const trimmed = tmdbId.trim();
     if (!trimmed) {
       setError('Enter a TMDB movie id');
+      return;
+    }
+    if (!server) {
+      setError('No server configured. Open Admin → Settings.');
       return;
     }
 

@@ -16,7 +16,12 @@ import {
 const CONTROL_WIDTH = 46
 
 /** Minimize / maximize / close for frameless Tauri windows. */
-export function WindowControls() {
+export function WindowControls({
+  onClose,
+}: {
+  /** Defaults to closing the window; player uses hide. */
+  onClose?: () => void | Promise<void>
+}) {
   const [maximized, setMaximized] = useState(false)
   const tauri = isTauri()
 
@@ -61,7 +66,7 @@ export function WindowControls() {
       </ControlButton>
       <ControlButton
         label="Close"
-        onClick={() => void closeWindow()}
+        onClick={() => void (onClose ? onClose() : closeWindow())}
         danger
       >
         <FontAwesomeIcon icon={faXmark} className="h-3.5 w-3.5" />

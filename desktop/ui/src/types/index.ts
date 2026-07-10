@@ -47,7 +47,10 @@ export interface MovieFileInfo {
 
 export interface HealthResponse {
   status: string
+  service?: string
+  version?: string
   movies_count: number
+  library_scanned_at?: number
 }
 
 export type ScanPhase = 'discovering' | 'enriching' | 'persisting'

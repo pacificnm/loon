@@ -7,7 +7,7 @@ import {
 import { fetchPerson, fetchPersonForCast } from '../api/client';
 import type { KnownForMovie, PersonDetail } from '../api/types';
 import { FocusButton } from '../components/FocusButton';
-import { getServerUrl, resolveArtworkUrl } from '../config';
+import { useServerUrl, resolveArtworkUrl } from '../config';
 import styles from './PersonPage.module.css';
 
 function parsePersonRouteId(raw: string): number | null {
@@ -39,7 +39,7 @@ export function PersonPage() {
   const castLookup = location.state as { movieSlug?: string; castName?: string } | null;
   const isLookup = tmdbId === 'lookup';
   const personId = parsePersonRouteId(tmdbId);
-  const server = getServerUrl();
+  const server = useServerUrl();
   const navigate = useNavigate();
   const [detail, setDetail] = useState<PersonDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,11 +53,17 @@ export function PersonPage() {
   });
 
   const resolveArtwork = useCallback(
-    (path: string | undefined) => resolveArtworkUrl(path, server, detail?.tmdb_person_id),
+    (path: string | undefined) =>
+      server ? resolveArtworkUrl(path, server, detail?.tmdb_person_id) : undefined,
     [detail?.tmdb_person_id, server],
   );
 
   useEffect(() => {
+    if (!server) {
+      setLoading(false);
+      setError('No server configured. Open Admin → Settings.');
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     setError(null);

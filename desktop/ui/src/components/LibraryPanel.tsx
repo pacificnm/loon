@@ -12,6 +12,7 @@ interface LibraryPanelProps {
   onMovieSelect: (slug: string) => void
   onBack: () => void
   onRefresh: () => void
+  onMovieUpdated?: (movie: MovieDetail) => void
 }
 
 export function LibraryPanel({
@@ -23,6 +24,7 @@ export function LibraryPanel({
   onMovieSelect,
   onBack,
   onRefresh,
+  onMovieUpdated,
 }: LibraryPanelProps) {
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -49,6 +51,7 @@ export function LibraryPanel({
       <MovieDetailView
         movie={selectedMovie}
         onBack={onBack}
+        onMovieUpdated={onMovieUpdated}
       />
     )
   }

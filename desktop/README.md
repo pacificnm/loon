@@ -22,14 +22,20 @@ Missing or invalid config → app exits immediately.
 
 ## Run
 
+Same commands as every Nest app — see [Nest build standard](../../../docs/build.md).
+
 ```bash
 cd apps/loon/desktop
-./build run      # build UI + release binary, launch
-./build dev      # tauri dev (Vite :5173)
+./build dev      # daily development (Tauri + Vite)
+./build run      # build + launch release binary
 ./build build    # production binary only
+./build test
+./build clean
 ```
 
 Binary: `target/release/loon-desktop`
+
+**Play** opens a **child player window** in Loon with a loading overlay, then streams via the HTML5 video element (same `/stream/:slug` URL as webOS).
 
 ## Verify backend
 

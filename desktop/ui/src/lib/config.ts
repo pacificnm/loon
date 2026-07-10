@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core'
 export interface DesktopConfig {
   serverUrl: string
   configPath: string
+  playerPath?: string
 }
 
 let cached: DesktopConfig | null = null
@@ -13,6 +14,7 @@ export async function loadDesktopConfig(): Promise<DesktopConfig> {
   const response = await invoke<{
     serverUrl: string
     configPath: string
+    playerPath?: string | null
   }>('plugin:loon|get_config')
   if (!response.serverUrl?.trim()) {
     throw new Error('serverUrl is not configured in ~/.config/loon/config.toml')
@@ -20,6 +22,7 @@ export async function loadDesktopConfig(): Promise<DesktopConfig> {
   cached = {
     serverUrl: response.serverUrl.trim().replace(/\/$/, ''),
     configPath: response.configPath,
+    playerPath: response.playerPath?.trim() || undefined,
   }
   return cached
 }

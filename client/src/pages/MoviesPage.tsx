@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchAllMovies } from '../api/client';
 import type { MovieSummary } from '../api/types';
 import { MovieAlphabetList } from '../components/MovieAlphabetList';
-import { getServerUrl } from '../config';
+import { useServerUrl } from '../config';
 import styles from './page.module.css';
 
 interface MoviesPageProps {
@@ -12,13 +12,19 @@ interface MoviesPageProps {
 }
 
 export function MoviesPage({ focusEpoch, genre }: MoviesPageProps) {
-  const server = getServerUrl();
+  const server = useServerUrl();
   const navigate = useNavigate();
   const [movies, setMovies] = useState<MovieSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    if (!server) {
+      setLoading(false);
+      setMovies([]);
+      setError('No server configured. Open Admin → Settings.');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -48,7 +54,7 @@ export function MoviesPage({ focusEpoch, genre }: MoviesPageProps) {
             </button>
           </div>
         ) : null}
-        {!loading && !error ? (
+        {!loading && !error && server ? (
           <MovieAlphabetList
             movies={movies}
             server={server}

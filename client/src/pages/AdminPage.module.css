@@ -67,3 +67,9 @@
   font-size: 20px;
   color: var(--primary);
 }
+
+.tabs {
+  display: flex;
+  gap: 12px;
+  padding: 0 40px 8px;
+}

@@ -6,7 +6,7 @@ import {
 } from '@noriginmedia/norigin-spatial-navigation';
 import { fetchGenres } from '../api/client';
 import type { GenreEntry } from '../api/types';
-import { getServerUrl } from '../config';
+import { useServerUrl } from '../config';
 import styles from './page.module.css';
 
 interface GenresPageProps {
@@ -39,7 +39,7 @@ function GenreItem({
 }
 
 export function GenresPage({ focusEpoch }: GenresPageProps) {
-  const server = getServerUrl();
+  const server = useServerUrl();
   const navigate = useNavigate();
   const [genres, setGenres] = useState<GenreEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +53,12 @@ export function GenresPage({ focusEpoch }: GenresPageProps) {
   });
 
   const load = useCallback(async () => {
+    if (!server) {
+      setLoading(false);
+      setGenres([]);
+      setError('No server configured. Open Admin → Settings.');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {

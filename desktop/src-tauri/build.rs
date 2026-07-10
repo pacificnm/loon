@@ -1,4 +1,4 @@
-const LOON_COMMANDS: &[&str] = &["get_config"];
+const LOON_COMMANDS: &[&str] = &["get_config", "play_stream"];
 
 fn main() {
     tauri_build::try_build(

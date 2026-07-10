@@ -1,10 +1,14 @@
 import { useParams } from 'react-router-dom';
-import { getServerUrl, streamUrl } from '../config';
+import { useServerUrl, streamUrl } from '../config';
 import { VideoPlayer } from '../player/VideoPlayer';
 
 export function PlayerPage() {
   const { slug = '' } = useParams();
-  const server = getServerUrl();
+  const server = useServerUrl();
+
+  if (!server) {
+    return <p>No server configured. Open Admin → Settings.</p>;
+  }
 
   return (
     <VideoPlayer

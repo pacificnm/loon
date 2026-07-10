@@ -1,52 +1,18 @@
-#!/bin/bash
-# Loon Admin Desktop — thin Tauri UI for the Loon backend API.
-# Not the webOS TV client (apps/loon/client) and not the server (apps/loon/server).
+#!/usr/bin/env bash
+# Loon Admin Desktop — Tauri + React. Standard Nest ./build interface.
+set -euo pipefail
 
-set -e
+APP_ROOT="$(cd "$(dirname "$0")" && pwd)"
+NEST_ROOT="$(cd "$APP_ROOT/../../.." && pwd)"
 
-cd "$(dirname "$0")"
-export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$(pwd)/target}"
+# shellcheck source=/dev/null
+source "$NEST_ROOT/scripts/nest-build/lib.sh"
 
-usage() {
-    echo "Usage: $0 {run|dev|build|clean}"
-    echo ""
-    echo "  run    Build UI + release binary, launch desktop admin"
-    echo "  dev    Tauri dev (Vite :5173 + hot reload)"
-    echo "  build  Production binary only"
-    echo "  clean  Remove build artifacts"
-    exit 1
-}
+export NEST_BUILD_PROFILE=tauri
+export NEST_UI_DIR=ui
+export NEST_CARGO_MANIFEST=src-tauri/Cargo.toml
+export NEST_RUST_PACKAGE=loon-desktop
+export NEST_RUST_BIN=loon-desktop
+export NEST_TAURI_MODE=binary
 
-ensure_ui_deps() {
-    if [[ ! -d ui/node_modules ]]; then
-        npm install --prefix ui
-    fi
-}
-
-case "${1:-}" in
-    run)
-        echo "Running Loon Admin desktop..."
-        ensure_ui_deps
-        npm run build --prefix ui
-        cargo build --release -p loon-desktop
-        exec ./target/release/loon-desktop
-        ;;
-    dev)
-        echo "Running Loon Admin desktop (dev)..."
-        ensure_ui_deps
-        npm run tauri:dev --prefix ui
-        ;;
-    build)
-        echo "Building Loon Admin desktop..."
-        ensure_ui_deps
-        npm run build --prefix ui
-        cargo build --release -p loon-desktop
-        echo "Binary: $(pwd)/target/release/loon-desktop"
-        ;;
-    clean)
-        rm -rf ui/dist ui/node_modules target
-        ;;
-    *)
-        usage
-        ;;
-esac
+nest_build_main "$@"

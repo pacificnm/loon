@@ -4,18 +4,22 @@ import { faChevronLeft, faPlay, faHeart, faPenToSquare } from '@fortawesome/free
 import type { MovieDetail as MovieDetailType } from '../types'
 import { loadDesktopConfig } from '../lib/config'
 import { setFavorite } from '../lib/api'
-import { openUrl } from '../lib/tauri'
+import { playStream } from '../lib/tauri'
+import { TmdbEditDialog } from './TmdbEditDialog'
 
 export interface MovieDetailProps {
   movie: MovieDetailType
   onBack: () => void
+  onMovieUpdated?: (movie: MovieDetailType) => void
 }
 
-export function MovieDetail({ movie, onBack }: MovieDetailProps) {
+export function MovieDetail({ movie, onBack, onMovieUpdated }: MovieDetailProps) {
   const [serverUrl, setServerUrl] = useState<string>('')
   const [isFavorite, setIsFavorite] = useState<boolean>(movie.is_favorite)
   const [favoriteLoading, setFavoriteLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [artworkVersion, setArtworkVersion] = useState(0)
 
   useEffect(() => {
     loadDesktopConfig()
@@ -26,21 +30,25 @@ export function MovieDetail({ movie, onBack }: MovieDetailProps) {
       .catch(err => setError(`Failed to load config: ${err}`))
   }, [])
 
-  const posterUrl = movie.poster_url && serverUrl ? `${serverUrl}${movie.poster_url}` : null
-  const backdropUrl = movie.backdrop_url && serverUrl ? `${serverUrl}${movie.backdrop_url}` : null
+  useEffect(() => {
+    setIsFavorite(movie.is_favorite)
+  }, [movie.is_favorite])
+
+  const artworkCacheBust = movie.tmdb_id ?? artworkVersion
+  const posterUrl = movie.poster_url && serverUrl
+    ? `${serverUrl}${movie.poster_url}?v=${encodeURIComponent(String(artworkCacheBust))}`
+    : null
+  const backdropUrl = movie.backdrop_url && serverUrl
+    ? `${serverUrl}${movie.backdrop_url}?v=${encodeURIComponent(String(artworkCacheBust))}`
+    : null
 
   const handlePlay = async () => {
-    if (!serverUrl) {
-      setError('Server URL not loaded yet')
-      return
-    }
+    setError(null)
     try {
-      const streamUrl = `${serverUrl}/stream/${movie.slug}`
-      console.log('Opening stream:', streamUrl)
-      await openUrl(streamUrl)
+      await playStream(movie.slug, movie.title)
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
-      setError(`Failed to open stream: ${msg}`)
+      setError(`Failed to start playback: ${msg}`)
     }
   }
 
@@ -64,14 +72,17 @@ export function MovieDetail({ movie, onBack }: MovieDetailProps) {
     }
   }
 
-  const handleEdit = async () => {
+  const handleEdit = () => {
     if (!serverUrl) {
       setError('Server URL not loaded yet')
       return
     }
-    // Open TMDB match dialog - for now just log
-    console.log('Edit movie:', movie.slug)
-    setError('Edit not implemented yet')
+    setEditOpen(true)
+  }
+
+  const handleTmdbSaved = (updated: MovieDetailType) => {
+    setArtworkVersion(Date.now())
+    onMovieUpdated?.(updated)
   }
 
   const formatRuntime = (minutes: number): string => {
@@ -115,6 +126,12 @@ export function MovieDetail({ movie, onBack }: MovieDetailProps) {
 
   return (
     <div className="h-full overflow-auto">
+      <TmdbEditDialog
+        open={editOpen}
+        movie={movie}
+        onClose={() => setEditOpen(false)}
+        onSaved={handleTmdbSaved}
+      />
       {error && (
         <div className="mb-4 rounded-loon-md border border-loon-error/20 bg-loon-error/10 p-3">
           <p className="text-sm text-loon-error">{error}</p>

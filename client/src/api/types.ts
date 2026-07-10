@@ -127,6 +127,14 @@ export type ScanStreamEvent =
     }
   | { type: 'error'; scan_id: string; message: string };
 
+export interface HealthResponse {
+  status: string;
+  service?: string;
+  version?: string;
+  movies_count: number;
+  library_scanned_at?: number;
+}
+
 export interface LibraryStatusResponse {
   state: string;
   last_scan_at?: string | null;

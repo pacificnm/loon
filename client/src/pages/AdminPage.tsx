@@ -3,6 +3,7 @@ import {
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   fetchLibraryStatus,
   LoonApiError,
@@ -10,13 +11,22 @@ import {
 } from '../api/client';
 import type { LibraryStatusResponse } from '../api/types';
 import { FocusButton } from '../components/FocusButton';
-import { getServerUrl } from '../config';
+import { useServerUrl } from '../config';
 import { formatScanEvent, formatScanProgress } from '../utils/scanLog';
+import { AdminSettingsTab } from './AdminSettingsTab';
 import adminStyles from './AdminPage.module.css';
 import styles from './page.module.css';
 
+type AdminTab = 'scan' | 'settings';
+
+function parseTab(value: string | null): AdminTab {
+  return value === 'settings' ? 'settings' : 'scan';
+}
+
 export function AdminPage() {
-  const server = getServerUrl();
+  const server = useServerUrl();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = parseTab(searchParams.get('tab'));
   const [status, setStatus] = useState<LibraryStatusResponse | null>(null);
   const [logLines, setLogLines] = useState<string[]>([]);
   const [streaming, setStreaming] = useState(false);
@@ -27,28 +37,48 @@ export function AdminPage() {
     focusable: false,
     trackChildren: true,
     focusKey: 'admin-page',
-    preferredChildFocusKey: 'admin-scan',
+    preferredChildFocusKey: tab === 'settings' ? 'admin-settings-url' : 'admin-scan',
   });
+
+  const setTab = (next: AdminTab) => {
+    if (next === 'scan') {
+      setSearchParams({});
+    } else {
+      setSearchParams({ tab: 'settings' });
+    }
+  };
+
+  useEffect(() => {
+    if (!server && tab !== 'settings') {
+      setSearchParams({ tab: 'settings' });
+    }
+  }, [server, setSearchParams, tab]);
 
   const appendLog = useCallback((line: string) => {
     setLogLines((previous) => [...previous, line]);
   }, []);
 
   const refreshStatus = useCallback(async () => {
+    if (!server) {
+      return null;
+    }
     const next = await fetchLibraryStatus(server);
     setStatus(next);
     return next;
   }, [server]);
 
   useEffect(() => {
+    if (!server || tab !== 'scan') {
+      return;
+    }
     void refreshStatus().catch((error: unknown) => {
       appendLog(error instanceof Error ? error.message : 'Failed to load library status');
     });
-  }, [appendLog, refreshStatus]);
+  }, [appendLog, refreshStatus, server, tab]);
 
   useEffect(() => {
     focusSelf();
-  }, [focusSelf]);
+  }, [focusSelf, tab]);
 
   useEffect(() => {
     if (logRef.current) {
@@ -63,7 +93,7 @@ export function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (!status?.scan_in_progress || streaming) {
+    if (!status?.scan_in_progress || streaming || tab !== 'scan' || !server) {
       return;
     }
 
@@ -74,11 +104,11 @@ export function AdminPage() {
     }, 2000);
 
     return () => window.clearInterval(intervalId);
-  }, [refreshStatus, status?.scan_in_progress, streaming]);
+  }, [refreshStatus, server, status?.scan_in_progress, streaming, tab]);
 
   const runScan = useCallback(
     async (full: boolean) => {
-      if (streaming) {
+      if (streaming || !server) {
         return;
       }
 
@@ -128,90 +158,112 @@ export function AdminPage() {
   return (
     <div className={styles.page}>
       <h1 className={styles.heading}>Admin</h1>
+      <FocusContext.Provider value={focusKey}>
+        <div ref={ref} className={adminStyles.tabs}>
+          <FocusButton
+            focusKey="admin-tab-scan"
+            label="Scan"
+            selected={tab === 'scan'}
+            onPress={() => setTab('scan')}
+          />
+          <FocusButton
+            focusKey="admin-tab-settings"
+            label="Settings"
+            selected={tab === 'settings'}
+            onPress={() => setTab('settings')}
+          />
+        </div>
+      </FocusContext.Provider>
       <div className={styles.content}>
-        <FocusContext.Provider value={focusKey}>
-          <div ref={ref} className={adminStyles.panel}>
-            <div className={adminStyles.statusBar}>
-              <span>
-                <span className={adminStyles.statusLabel}>State: </span>
-                <span
-                  className={
-                    status?.scan_in_progress ? adminStyles.statusScanning : adminStyles.statusValue
-                  }
-                >
-                  {status?.state ?? '…'}
-                </span>
-              </span>
-              <span>
-                <span className={adminStyles.statusLabel}>Movies: </span>
-                <span className={adminStyles.statusValue}>{status?.movies_count ?? '…'}</span>
-              </span>
-              <span>
-                <span className={adminStyles.statusLabel}>Last scan: </span>
-                <span className={adminStyles.statusValue}>{lastScanLabel}</span>
-              </span>
-              {status && status.last_scan_duration_secs > 0 ? (
+        {tab === 'settings' ? (
+          <AdminSettingsTab />
+        ) : !server ? (
+          <p className={styles.status}>Set the server URL in Settings before scanning.</p>
+        ) : (
+          <FocusContext.Provider value={focusKey}>
+            <div className={adminStyles.panel}>
+              <div className={adminStyles.statusBar}>
                 <span>
-                  <span className={adminStyles.statusLabel}>Duration: </span>
-                  <span className={adminStyles.statusValue}>
-                    {status.last_scan_duration_secs}s
+                  <span className={adminStyles.statusLabel}>State: </span>
+                  <span
+                    className={
+                      status?.scan_in_progress ? adminStyles.statusScanning : adminStyles.statusValue
+                    }
+                  >
+                    {status?.state ?? '…'}
                   </span>
                 </span>
-              ) : null}
-            </div>
+                <span>
+                  <span className={adminStyles.statusLabel}>Movies: </span>
+                  <span className={adminStyles.statusValue}>{status?.movies_count ?? '…'}</span>
+                </span>
+                <span>
+                  <span className={adminStyles.statusLabel}>Last scan: </span>
+                  <span className={adminStyles.statusValue}>{lastScanLabel}</span>
+                </span>
+                {status && status.last_scan_duration_secs > 0 ? (
+                  <span>
+                    <span className={adminStyles.statusLabel}>Duration: </span>
+                    <span className={adminStyles.statusValue}>
+                      {status.last_scan_duration_secs}s
+                    </span>
+                  </span>
+                ) : null}
+              </div>
 
-            {showRemoteProgress && status?.progress ? (
-              <p className={adminStyles.liveProgress}>
-                Scan in progress — {formatScanProgress(status.progress)}
-              </p>
-            ) : null}
-
-            <div className={adminStyles.actions}>
-              <FocusButton
-                focusKey="admin-scan"
-                label={streaming ? 'Scanning…' : 'Scan library'}
-                onPress={() => void runScan(false)}
-              />
-              <FocusButton
-                focusKey="admin-scan-full"
-                label="Refresh metadata"
-                onPress={() => void runScan(true)}
-              />
-              <FocusButton
-                focusKey="admin-refresh"
-                label="Refresh status"
-                onPress={() => {
-                  void refreshStatus().catch((error: unknown) => {
-                    appendLog(
-                      error instanceof Error ? error.message : 'Failed to refresh status',
-                    );
-                  });
-                }}
-              />
-              <FocusButton
-                focusKey="admin-clear"
-                label="Clear log"
-                onPress={() => setLogLines([])}
-              />
-            </div>
-
-            <div ref={logRef} className={adminStyles.log} aria-live="polite">
-              {logLines.length === 0 ? (
-                <p className={adminStyles.logEmpty}>
-                  Scan output will appear here. Scan library finds new or changed files.
-                  Refresh metadata re-fetches TMDB for unlocked movies using their stored id
-                  (manual Edit matches are never overwritten).
+              {showRemoteProgress && status?.progress ? (
+                <p className={adminStyles.liveProgress}>
+                  Scan in progress — {formatScanProgress(status.progress)}
                 </p>
-              ) : (
-                logLines.map((line, index) => (
-                  <div key={`${index}-${line}`} className={adminStyles.logLine}>
-                    {line}
-                  </div>
-                ))
-              )}
+              ) : null}
+
+              <div className={adminStyles.actions}>
+                <FocusButton
+                  focusKey="admin-scan"
+                  label={streaming ? 'Scanning…' : 'Scan library'}
+                  onPress={() => void runScan(false)}
+                />
+                <FocusButton
+                  focusKey="admin-scan-full"
+                  label="Refresh metadata"
+                  onPress={() => void runScan(true)}
+                />
+                <FocusButton
+                  focusKey="admin-refresh"
+                  label="Refresh status"
+                  onPress={() => {
+                    void refreshStatus().catch((error: unknown) => {
+                      appendLog(
+                        error instanceof Error ? error.message : 'Failed to refresh status',
+                      );
+                    });
+                  }}
+                />
+                <FocusButton
+                  focusKey="admin-clear"
+                  label="Clear log"
+                  onPress={() => setLogLines([])}
+                />
+              </div>
+
+              <div ref={logRef} className={adminStyles.log} aria-live="polite">
+                {logLines.length === 0 ? (
+                  <p className={adminStyles.logEmpty}>
+                    Scan output will appear here. Scan library finds new or changed files.
+                    Refresh metadata re-fetches TMDB for unlocked movies using their stored id
+                    (manual Edit matches are never overwritten).
+                  </p>
+                ) : (
+                  logLines.map((line, index) => (
+                    <div key={`${index}-${line}`} className={adminStyles.logLine}>
+                      {line}
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-          </div>
-        </FocusContext.Provider>
+          </FocusContext.Provider>
+        )}
       </div>
     </div>
   );

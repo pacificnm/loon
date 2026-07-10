@@ -31,6 +31,11 @@ export function App() {
     setSelectedMovie(null)
   }
 
+  const handleMovieUpdated = (movie: MovieDetail) => {
+    setSelectedMovie(movie)
+    void refreshMovies()
+  }
+
   const renderContent = () => {
     switch (activeSection) {
       case 'library':
@@ -44,6 +49,7 @@ export function App() {
             onMovieSelect={handleMovieSelect}
             onBack={handleBack}
             onRefresh={refreshMovies}
+            onMovieUpdated={handleMovieUpdated}
           />
         )
       case 'scan':

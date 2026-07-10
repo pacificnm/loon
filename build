@@ -1,64 +1,21 @@
 #!/usr/bin/env bash
+# Loon — Rust server workspace. Standard Nest ./build interface.
 set -euo pipefail
 
 APP_ROOT="$(cd "$(dirname "$0")" && pwd)"
-export CARGO_TARGET_DIR="$APP_ROOT/target"
-export RUSTFLAGS="${RUSTFLAGS:--D warnings}"
+NEST_ROOT="$(cd "$APP_ROOT/../.." && pwd)"
 
-cd "$APP_ROOT"
+# shellcheck source=/dev/null
+source "$NEST_ROOT/scripts/nest-build/lib.sh"
 
 cmd="${1:-build}"
-shift || true
+if [[ "$cmd" == desktop ]]; then
+  shift || true
+  exec "$APP_ROOT/desktop/build" "$@"
+fi
 
-case "$cmd" in
-  build)
-    cargo build -p loon-server "$@"
-    ;;
-  release)
-    cargo build -p loon-server --release "$@"
-    ;;
-  run)
-    profile=debug
-    if [[ "${1:-}" == "--release" ]]; then
-      profile=release
-      shift
-    fi
-    bin="$APP_ROOT/target/$profile/loon-server"
-    if [[ ! -x "$bin" ]]; then
-      if [[ "$profile" == release ]]; then
-        cargo build -p loon-server --release
-      else
-        cargo build -p loon-server
-      fi
-    fi
-    config_args=()
-    if [[ -f "$APP_ROOT/config.toml" ]]; then
-      config_args=(--config "$APP_ROOT/config.toml")
-    fi
-    if [[ "${1:-}" == "--" ]]; then
-      shift
-    fi
-    exec "$bin" "${config_args[@]}" "$@"
-    ;;
-  test)
-    cargo test -p loon-server -- --test-threads=1 "$@"
-    ;;
-  clippy)
-    cargo clippy -p loon-server -- -D warnings "$@"
-    ;;
-  fmt)
-    cargo fmt --all "$@"
-    ;;
-  check)
-    cargo fmt --all -- --check
-    cargo clippy -p loon-server -- -D warnings
-    cargo test -p loon-server -- --test-threads=1
-    cargo build -p loon-server --release
-    ;;
-  desktop)
-    exec "$APP_ROOT/desktop/build" "$@"
-    ;;
-  *)
-    cargo "$cmd" -p loon-server "$@"
-    ;;
-esac
+export NEST_BUILD_PROFILE=rust
+export NEST_RUST_PACKAGE=loon-server
+export NEST_RUST_BIN=loon-server
+
+nest_build_main "$@"

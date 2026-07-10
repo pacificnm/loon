@@ -3,6 +3,7 @@ import type {
   BrowseResponse,
   FavoriteResponse,
   GenresResponse,
+  HealthResponse,
   LibraryStatusResponse,
   MovieDetail,
   MovieListResponse,
@@ -218,6 +219,10 @@ export async function fetchAllMovies(
 
 export async function fetchLibraryStatus(baseUrl: string): Promise<LibraryStatusResponse> {
   return request<LibraryStatusResponse>(baseUrl, '/api/library/status');
+}
+
+export async function fetchHealth(baseUrl: string): Promise<HealthResponse> {
+  return request<HealthResponse>(baseUrl, '/api/health');
 }
 
 export interface StreamLibraryScanOptions {

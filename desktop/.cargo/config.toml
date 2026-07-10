@@ -1,13 +1,12 @@
+# Path patches for the desktop workspace only (Tauri shell).
+# Server patches live in apps/loon/Cargo.toml — not inherited here.
 [patch."https://github.com/pacificnm/nest"]
+nest-tauri = { path = "../../../core/crates/nest-tauri" }
+nest-react-theme = { path = "../../../core/crates/nest-react-theme" }
 nest-app = { path = "../../../core/crates/nest-app" }
 nest-config = { path = "../../../core/crates/nest-config" }
 nest-core = { path = "../../../core/crates/nest-core" }
 nest-design = { path = "../../../core/crates/nest-design" }
 nest-error = { path = "../../../core/crates/nest-error" }
-nest-gui = { path = "../../../core/crates/nest-gui" }
 nest-logging = { path = "../../../core/crates/nest-logging" }
 nest-theme = { path = "../../../core/crates/nest-theme" }
-nest-icon = { path = "../../../core/crates/nest-icon" }
-nest-image = { path = "../../../core/crates/nest-image" }
-nest-cache = { path = "../../../core/crates/nest-cache" }
-nest-cache-file = { path = "../../../modules/crates/nest-cache-file" }

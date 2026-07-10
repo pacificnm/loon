@@ -12,7 +12,7 @@ import {
 import type { MovieDetail, MovieSummary } from '../api/types';
 import { FocusButton, FocusTile } from '../components/FocusButton';
 import { HorizontalRow } from '../components/HorizontalRow';
-import { getServerUrl, resolveArtworkUrl } from '../config';
+import { useServerUrl, resolveArtworkUrl } from '../config';
 import { CrewCreditsSection, FileDetailsSection } from './MovieFileDetails';
 import styles from './MovieDetailPage.module.css';
 
@@ -27,7 +27,7 @@ export function MovieDetailPage({
   refreshEpoch = 0,
 }: MovieDetailPageProps) {
   const { slug = '' } = useParams();
-  const server = getServerUrl();
+  const server = useServerUrl();
   const navigate = useNavigate();
   const [detail, setDetail] = useState<MovieDetail | null>(null);
   const [similar, setSimilar] = useState<MovieSummary[]>([]);
@@ -43,6 +43,13 @@ export function MovieDetailPage({
   });
 
   const load = useCallback(async () => {
+    if (!server) {
+      setError('No server configured. Open Admin → Settings.');
+      setDetail(null);
+      setSimilar([]);
+      setLoading(false);
+      return;
+    }
     setError(null);
     setSimilar([]);
     ref.current?.scrollTo(0, 0);
@@ -91,7 +98,7 @@ export function MovieDetailPage({
   }, [detail, focusSelf]);
 
   const toggleFavorite = async () => {
-    if (!detail || favoriteBusy) {
+    if (!detail || favoriteBusy || !server) {
       return;
     }
     setFavoriteBusy(true);
@@ -108,7 +115,8 @@ export function MovieDetailPage({
   const artworkVersion = detail?.tmdb_id ?? refreshEpoch;
 
   const resolveArtwork = useCallback(
-    (path: string | undefined) => resolveArtworkUrl(path, server, artworkVersion),
+    (path: string | undefined) =>
+      server ? resolveArtworkUrl(path, server, artworkVersion) : undefined,
     [artworkVersion, server],
   );
 

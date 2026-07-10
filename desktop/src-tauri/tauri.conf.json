@@ -17,6 +17,16 @@
         "width": 1280,
         "height": 800,
         "decorations": false
+      },
+      {
+        "label": "player",
+        "title": "Loon Player",
+        "url": "player.html",
+        "width": 1280,
+        "height": 720,
+        "visible": false,
+        "decorations": false,
+        "resizable": true
       }
     ],
     "security": {

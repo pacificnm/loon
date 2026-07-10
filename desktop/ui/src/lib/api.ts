@@ -44,6 +44,18 @@ export async function setFavorite(slug: string, favorite: boolean): Promise<void
   })
 }
 
+/** Updates TMDB metadata for a movie and returns the refreshed detail. */
+export async function setMovieTmdbMatch(
+  slug: string,
+  tmdbId: string,
+): Promise<MovieDetail> {
+  return apiFetch<MovieDetail>(`/api/movies/${encodeURIComponent(slug)}/match`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tmdb_id: tmdbId }),
+  })
+}
+
 /** Gets the stream URL for a movie. */
 export function getStreamUrl(slug: string): string {
   return `/stream/${slug}`

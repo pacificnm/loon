@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "src-tauri",
+    "crates/loon-player",
 ]
 
 [workspace.package]
@@ -11,12 +12,10 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/pacificnm/loon"
 
 [workspace.dependencies]
-nest-cache = { git = "https://github.com/pacificnm/nest", branch = "main" }
-nest-cache-file = { git = "https://github.com/pacificnm/nest", branch = "main" }
 nest-config = { git = "https://github.com/pacificnm/nest", branch = "main" }
 nest-error = { git = "https://github.com/pacificnm/nest", branch = "main" }
-nest-image = { git = "https://github.com/pacificnm/nest", branch = "main" }
 nest-tauri = { git = "https://github.com/pacificnm/nest", branch = "main" }
 nest-theme = { git = "https://github.com/pacificnm/nest", branch = "main" }
+loon-player = { path = "crates/loon-player" }
 tauri = { version = "2" }
 tracing = "0.1"
